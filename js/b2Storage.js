@@ -6,7 +6,7 @@
  */
 
 import { showNotification } from './notifications.js';
-import { UI } from './ui.js';
+import * as UI from './ui.js';
 
 /**
  * Converts a File object to a Base64 encoded string.
@@ -40,7 +40,7 @@ export async function uploadImageToB2(file, targetPath) {
         return null;
     }
 
-    // UI.showLoader(); // Consider showing loader here if needed
+    UI.showLoader(); // Show loader during upload
 
     try {
         // Convert the file to a Base64 string to send in JSON body
@@ -73,6 +73,6 @@ export async function uploadImageToB2(file, targetPath) {
         showNotification(`Tải ảnh lên thất bại: ${error.message}`, 'error');
         return null;
     } finally {
-        // UI.hideLoader(); // Hide loader after operation
+        UI.hideLoader(); // Hide loader after operation
     }
 }
