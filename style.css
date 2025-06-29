@@ -1,0 +1,1298 @@
+
+/* ============================================= */
+/* QUOTATION APP - STYLE.CSS (v34 - Iconography Phase 1) */
+/* ============================================= */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+    /* Light Mode (Default) */
+    --primary-color: #3B82F6; 
+    --primary-hover-color: #2563EB;
+    --danger-color: #EF4444; 
+    --danger-hover-color: #DC2626;
+    --success-color: #10B981; 
+    --success-hover-color: #059669;
+    --warning-color: #F59E0B; 
+    --warning-hover-color: #D97706;
+    --preview-color: #6366F1; 
+    --preview-hover-color: #4F46E5;
+    
+    --background-color: #F3F4F6; 
+    --surface-color: #FFFFFF;
+    --border-color: #D1D5DB; 
+    --border-color-soft: #E5E7EB; 
+    
+    --text-primary-color: #1F2937; 
+    --text-secondary-color: #4B5563; 
+    --text-placeholder-color: #9CA3AF; 
+    --text-on-primary: #FFFFFF;
+
+    --item-entry-form-box-bg: #F9FAFB;
+    --table-header-bg: #F3F4F6;
+    --table-row-even-bg: #F9FAFB;
+    --table-row-hover-bg: #EFF6FF;
+    --total-section-bg: #F9FAFB;
+    --auth-modal-overlay-bg: rgba(31, 41, 55, 0.7);
+    --loader-overlay-bg: rgba(243, 244, 246, 0.75);
+    --button-quick-save-bg: #14B8A6;
+    --button-quick-save-hover-bg: #0D9488;
+    --collapsible-summary-icon-bg: transparent; /* Changed for SVG icon */
+    --collapsible-summary-icon-border: transparent; /* Changed for SVG icon */
+    --collapsible-summary-icon-color: var(--text-secondary-color);
+    --collapsible-summary-icon-hover-border: transparent; /* Changed for SVG icon */
+    --collapsible-summary-icon-hover-color: var(--primary-color);
+
+
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --border-radius: 8px; 
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --input-height: 42px; 
+    --primary-color-rgb: 59,130,246; 
+}
+
+/* Dark Mode Variables */
+:root {
+    --dark-primary-color: #5FA4F9;
+    --dark-primary-hover-color: #81B7FB;
+    --dark-danger-color: #F87171;
+    --dark-danger-hover-color: #FCA5A5;
+    --dark-success-color: #34D399;
+    --dark-success-hover-color: #6EE7B7;
+    --dark-warning-color: #FBBF24;
+    --dark-warning-hover-color: #FCD34D;
+    --dark-preview-color: #818CF8;
+    --dark-preview-hover-color: #A78BFA;
+    
+    --dark-background-color: #111827; /* Gray 900 */
+    --dark-surface-color: #1F2937; /* Gray 800 */
+    --dark-border-color: #374151; /* Gray 700 */
+    --dark-border-color-soft: #4B5563; /* Gray 600 */
+    
+    --dark-text-primary-color: #F3F4F6; /* Gray 100 */
+    --dark-text-secondary-color: #9CA3AF; /* Gray 400 */
+    --dark-text-placeholder-color: #6B7280; /* Gray 500 */
+    --dark-text-on-primary: #FFFFFF; /* Stays white for primary buttons */
+
+    --dark-item-entry-form-box-bg: #374151; /* Gray 700 */
+    --dark-table-header-bg: #374151;  /* Gray 700 */
+    --dark-table-row-even-bg: #2b3341; /* Slightly lighter than surface for contrast */
+    --dark-table-row-hover-bg: #4B5563; /* Gray 600 */
+    --dark-total-section-bg: #374151; /* Gray 700 */
+    --dark-auth-modal-overlay-bg: rgba(17, 24, 39, 0.85); /* Gray 900 with alpha */
+    --dark-loader-overlay-bg: rgba(31, 41, 55, 0.75); /* Gray 800 with alpha */
+    --dark-button-quick-save-bg: #0F766E; 
+    --dark-button-quick-save-hover-bg: #134E4A;
+    --dark-collapsible-summary-icon-bg: transparent; /* Changed for SVG icon */
+    --dark-collapsible-summary-icon-border: transparent; /* Changed for SVG icon */
+    --dark-collapsible-summary-icon-color: var(--dark-text-secondary-color);
+    --dark-collapsible-summary-icon-hover-border: transparent; /* Changed for SVG icon */
+    --dark-collapsible-summary-icon-hover-color: var(--dark-primary-color);
+
+    --dark-primary-color-rgb: 95,164,249;
+}
+
+body.dark-mode {
+    --primary-color: var(--dark-primary-color);
+    --primary-hover-color: var(--dark-primary-hover-color);
+    --danger-color: var(--dark-danger-color);
+    --danger-hover-color: var(--dark-danger-hover-color);
+    --success-color: var(--dark-success-color);
+    --success-hover-color: var(--dark-success-hover-color);
+    --warning-color: var(--dark-warning-color);
+    --warning-hover-color: var(--dark-warning-hover-color);
+    --preview-color: var(--dark-preview-color);
+    --preview-hover-color: var(--dark-preview-hover-color);
+    
+    --background-color: var(--dark-background-color);
+    --surface-color: var(--dark-surface-color);
+    --border-color: var(--dark-border-color);
+    --border-color-soft: var(--dark-border-color-soft);
+    
+    --text-primary-color: var(--dark-text-primary-color);
+    --text-secondary-color: var(--dark-text-secondary-color);
+    --text-placeholder-color: var(--dark-text-placeholder-color);
+    /* --text-on-primary remains white usually */
+
+    --item-entry-form-box-bg: var(--dark-item-entry-form-box-bg);
+    --table-header-bg: var(--dark-table-header-bg);
+    --table-row-even-bg: var(--dark-table-row-even-bg);
+    --table-row-hover-bg: var(--dark-table-row-hover-bg);
+    --total-section-bg: var(--dark-total-section-bg);
+    --auth-modal-overlay-bg: var(--dark-auth-modal-overlay-bg);
+    --loader-overlay-bg: var(--dark-loader-overlay-bg);
+    --button-quick-save-bg: var(--dark-button-quick-save-bg);
+    --button-quick-save-hover-bg: var(--dark-button-quick-save-hover-bg);
+    --primary-color-rgb: var(--dark-primary-color-rgb);
+    --collapsible-summary-icon-bg: var(--dark-collapsible-summary-icon-bg);
+    --collapsible-summary-icon-border: var(--dark-collapsible-summary-icon-border);
+    --collapsible-summary-icon-color: var(--dark-collapsible-summary-icon-color);
+    --collapsible-summary-icon-hover-border: var(--dark-collapsible-summary-icon-hover-border);
+    --collapsible-summary-icon-hover-color: var(--dark-collapsible-summary-icon-hover-color);
+}
+
+
+body.app-body { 
+    font-family: var(--font-sans);
+    margin: 0;
+    padding: 20px; 
+    background-color: var(--background-color); 
+    line-height: 1.6; 
+    color: var(--text-primary-color); 
+    font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.container { 
+    max-width: 1320px; 
+    margin: 20px auto; 
+    background-color: var(--surface-color); 
+    padding: 30px 40px; 
+    border-radius: var(--border-radius); 
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border-color-soft);
+}
+
+/* App Header Styling */
+.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px; 
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border-color-soft);
+}
+
+.app-header h1 {
+    margin-bottom: 0; 
+    font-size: 1.8em; 
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+/* User Info Area in Header */
+#auth-container {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Adjusted gap */
+    padding: 6px 10px; /* Adjusted padding */
+    background-color: var(--background-color); 
+    border-radius: var(--border-radius);
+}
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    color: var(--text-on-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1em;
+    font-weight: 600;
+    flex-shrink: 0; /* Prevent avatar from shrinking */
+}
+#user-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+#auth-status {
+    font-size: 0.9em;
+    font-weight: 500;
+    color: var(--text-primary-color);
+    margin: 0;
+    line-height: 1.2;
+    white-space: nowrap; /* Prevent name from wrapping */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 150px; /* Adjust as needed */
+}
+#auth-status small { 
+    display: block;
+    font-size: 0.8em;
+    font-weight: normal;
+}
+
+#logoutButton.small-btn {
+    padding: 4px 8px; 
+    font-size: 0.8em;
+    margin-top: 2px;
+}
+
+.dark-mode-toggle-global {
+    padding: 6px 8px; /* Slightly smaller padding */
+    font-size: 1.2em; /* Icon size */
+    background-color: transparent;
+    color: var(--text-secondary-color);
+    border: 1px solid transparent; /* Keep layout consistent */
+    margin-right: 5px; /* Space between toggle and avatar */
+    line-height: 1; /* Ensure icon is centered */
+}
+.dark-mode-toggle-global:hover {
+    background-color: var(--border-color-soft);
+    border-color: var(--border-color);
+    color: var(--text-primary-color);
+}
+body.dark-mode .dark-mode-toggle-global {
+    color: var(--dark-text-secondary-color);
+}
+body.dark-mode .dark-mode-toggle-global:hover {
+    background-color: var(--dark-border-color-soft);
+    border-color: var(--dark-border-color);
+    color: var(--dark-text-primary-color);
+}
+
+
+h1, h2, h3, h4 { color: var(--text-primary-color); font-weight: 600; }
+h2 { 
+    margin-top: 25px; margin-bottom: 20px; 
+    border-bottom: 1px solid var(--border-color-soft); 
+    padding-bottom: 12px; font-size: 1.5em; 
+}
+h3 { 
+    margin-top:20px; margin-bottom:15px; font-size:1.25em; 
+    color: var(--primary-color);
+}
+.form-section h4, .admin-section-box h4, .admin-section-box h5,
+.form-section-summary h4 { /* Added for summary in details */
+    font-size: 1.05em;
+    color: var(--text-secondary-color);
+    margin-top: 0; /* Adjusted for summary */
+    margin-bottom: 0; /* Adjusted for summary */
+    padding-bottom: 0; /* Adjusted for summary */
+    border-bottom: none; /* Adjusted for summary */
+    font-weight: 500;
+}
+.admin-section-box h5 {
+    font-size: 1em;
+    color: var(--primary-color);
+}
+
+
+/* Tabs */
+.tabs { display: flex; flex-wrap: wrap; border-bottom: 2px solid var(--border-color-soft); margin-bottom: 25px; }
+.tab-button { 
+    background-color: transparent; border: none; border-bottom: 3px solid transparent; 
+    padding: 10px 16px; cursor: pointer; font-size: 1em; color: var(--text-secondary-color); 
+    margin-right: 8px; margin-bottom: -2px; transition: color 0.2s, border-bottom-color 0.2s, background-color 0.2s; 
+    font-weight: 500; border-radius: 6px 6px 0 0;
+}
+.tab-button:hover { 
+    color: var(--primary-hover-color); 
+    background-color: rgba(var(--primary-color-rgb), 0.08); /* Subtle hover background */
+}
+.tab-button.active { 
+    color: var(--primary-color); 
+    border-bottom-color: var(--primary-color); 
+    font-weight: 600; 
+    background-color: transparent;
+}
+
+body.dark-mode .tab-button:hover {
+    background-color: rgba(var(--dark-primary-color-rgb), 0.15); /* Slightly more opaque for dark mode */
+}
+
+
+.tab-button#admin-tab { background-color: rgba(239, 68, 68, 0.1); color: var(--danger-color); border-bottom: 3px solid transparent;}
+body.dark-mode .tab-button#admin-tab { background-color: rgba(248, 113, 113, 0.15); color: var(--dark-danger-color); }
+
+.tab-button#admin-tab:hover { background-color: rgba(239, 68, 68, 0.2); }
+body.dark-mode .tab-button#admin-tab:hover { background-color: rgba(248, 113, 113, 0.25); }
+
+.tab-button#admin-tab.active { border-bottom-color: var(--danger-color); background-color: transparent; }
+body.dark-mode .tab-button#admin-tab.active { border-bottom-color: var(--dark-danger-color); }
+
+
+.tab-content { display: none; animation: fadeIn 0.4s ease-out; }
+.tab-content.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Forms */
+.form-group { margin-bottom: 20px; } /* Increased from 18px */
+.form-group-inline { 
+    margin-bottom: 8px; display: flex; 
+    align-items: center; justify-content: flex-end;
+}
+.form-group-inline input[type="checkbox"] { width: auto; margin-right: 8px; vertical-align: middle; height: 1em; width: 1em; accent-color: var(--primary-color); }
+.form-group-inline label { margin-right: 10px; margin-bottom: 0; font-weight: normal; font-size: 0.95em;}
+
+.form-group-checkbox { /* For "Remember me" checkbox */
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Space between checkbox and label */
+    margin-bottom: 15px; /* Spacing before next element */
+    justify-content: flex-start; /* Align to the left */
+}
+.form-group-checkbox input[type="checkbox"] {
+    width: auto; /* Override default width */
+    height: auto; /* Override default height */
+    margin-bottom: 0; /* Remove bottom margin if any from global input styles */
+    accent-color: var(--primary-color);
+}
+.form-group-checkbox label {
+    margin-bottom: 0; /* Remove bottom margin from global label styles */
+    font-weight: normal; /* Normal weight for checkbox label */
+    font-size: 0.9em;
+    color: var(--text-secondary-color);
+}
+
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+.quote-actions-footer { /* Keep this specific class for the quote footer */
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 25px; /* Ensure spacing from content above */
+    padding-top: 15px; /* Add some padding above the buttons */
+    border-top: 1px solid var(--border-color-soft); /* Visual separator */
+}
+.quote-actions-footer button {
+    padding: 8px 14px; 
+    font-size: 0.9em;
+}
+
+
+label { display: block; margin-bottom: 6px; font-weight: 500; color: var(--text-secondary-color); font-size: 0.9em;}
+input[type="text"], input[type="number"], input[type="date"], input[type="email"], 
+input[type="password"], input[type="hidden"], select, textarea, input[type="color"].color-input {
+    width: 100%; 
+    padding: 0 12px;
+    height: var(--input-height);
+    box-sizing: border-box; 
+    border: 1px solid var(--border-color); 
+    border-radius: var(--border-radius); 
+    transition: border-color 0.2s, box-shadow 0.2s; 
+    font-size: 0.95em;
+    background-color: var(--surface-color);
+    color: var(--text-primary-color);
+}
+input[type="hidden"] {
+    display: none; /* Explicitly hide */
+}
+textarea { min-height: 80px; resize: vertical; padding: 10px 12px; height: auto; }
+input::placeholder, textarea::placeholder { color: var(--text-placeholder-color); opacity: 1; }
+input[type="file"].file-input {
+    padding: 8px; 
+    height: auto;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+}
+input[type="file"].file-input:hover {
+    border-color: var(--primary-color);
+}
+
+input[type="color"].color-input {
+    padding: 4px;
+    height: var(--input-height);
+}
+
+
+.input-group {
+    display: flex;
+}
+.input-group input {
+    flex-grow: 1;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-right: none;
+}
+.input-group select.input-group-select, .input-group button.input-group-button {
+    flex-shrink: 0;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    margin-left: -1px; /* Overlap border */
+    height: var(--input-height);
+}
+.input-group select.input-group-select {
+    width: auto;
+    min-width: 70px;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+.input-group button.input-group-button {
+    border: 1px solid var(--border-color); /* Add border to match inputs */
+}
+
+
+input:focus, select:focus, textarea:focus { 
+    border-color: var(--primary-color); outline: 0; 
+    box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.3); 
+}
+
+
+/* Item Entry Form Box Style */
+.item-entry-form-box {
+    padding: 20px 25px;
+    border: 1px solid var(--border-color-soft);
+    border-radius: var(--border-radius);
+    background-color: var(--item-entry-form-box-bg); 
+    margin-bottom: 25px;
+    box-shadow: var(--shadow-sm);
+}
+/* Divider within form sections */
+.form-section-divider-subtle {
+    border: none;
+    border-top: 1px dashed var(--border-color-soft);
+    margin: 20px 0;
+}
+/* Collapsible Form Sections */
+details.form-section-collapsible > summary.form-section-summary {
+    cursor: pointer;
+    list-style: none; /* Remove default marker for Firefox */
+    padding: 8px 0; /* Add some padding to make it look like a header */
+    margin-bottom: 10px; /* Space before content when open */
+    border-bottom: 1px dashed var(--border-color-soft); /* Match subtle divider */
+    display: flex; /* For aligning icon */
+    align-items: center; /* For aligning icon */
+}
+details.form-section-collapsible > summary.form-section-summary::-webkit-details-marker {
+    display: none; /* Remove default marker for WebKit */
+}
+details.form-section-collapsible > summary.form-section-summary h4 {
+    display: inline; /* To allow icon next to it if needed */
+    color: var(--primary-color);
+    flex-grow: 1; /* Allow h4 to take space */
+}
+.form-section-content {
+    padding-top: 10px;
+}
+
+
+/* Item Line Total Preview in Form */
+.item-line-total-preview-form {
+    text-align: right;
+    font-size: 0.95em;
+    margin-top: 10px;
+    margin-bottom: 0;
+    color: var(--text-secondary-color);
+}
+.item-line-total-preview-form strong {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+
+button { 
+    background-color: var(--primary-color); color: var(--text-on-primary); border: none; padding: 10px 18px; 
+    border-radius: var(--border-radius); cursor: pointer; transition: background-color 0.2s, box-shadow 0.2s, opacity 0.2s; 
+    font-weight: 500; font-size: 0.95em;
+    box-shadow: var(--shadow-sm);
+    display: inline-flex; 
+    align-items: center;
+    justify-content: center;
+    line-height: 1.5; 
+    height: var(--input-height); 
+    gap: 8px; /* For spacing between icon/spinner and text */
+}
+button:hover { background-color: var(--primary-hover-color); box-shadow: var(--shadow-md); }
+button:disabled {
+    background-color: #9CA3AF; /* Gray 400 */
+    color: #E5E7EB; /* Gray 200 */
+    cursor: not-allowed;
+    box-shadow: none;
+    opacity: 0.7;
+}
+body.dark-mode button:disabled {
+    background-color: #4B5563; /* Gray 600 */
+    color: #9CA3AF; /* Gray 400 */
+}
+
+/* Button Spinner */
+.btn-spinner {
+    width: 1.2em; /* Adjust size as needed, relative to button font size */
+    height: 1.2em;
+    border: 2px solid currentColor; /* Use button's text color */
+    border-right-color: transparent; /* Makes the break in the circle */
+    border-radius: 50%;
+    display: inline-block;
+    animation: btn-spinner-anim 0.75s linear infinite;
+    flex-shrink: 0; /* Prevent spinner from shrinking */
+}
+
+@keyframes btn-spinner-anim {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+
+button.delete-btn { background-color: var(--danger-color); }
+button.delete-btn:hover { background-color: var(--danger-hover-color); }
+button.save-btn { background-color: var(--success-color); }
+button.save-btn:hover { background-color: var(--success-hover-color); }
+button.pdf-btn { background-color: var(--warning-color); color: var(--text-primary-color); }
+button.pdf-btn:hover { background-color: var(--warning-hover-color); }
+body.dark-mode button.pdf-btn { color: var(--text-primary-color); } /* Ensure contrast in dark mode */
+
+button.preview-btn { background-color: var(--preview-color); color: var(--text-on-primary); }
+button.preview-btn:hover { background-color: var(--preview-hover-color); }
+button.clear-btn { background-color: #6B7280; color: var(--text-on-primary); } 
+button.clear-btn:hover { background-color: #4B5563; } 
+button.add-new-row-btn { background-color: #0EA5E9; color: var(--text-on-primary); } 
+button.add-new-row-btn:hover { background-color: #0284C7; } 
+
+button.primary-action-btn { 
+    background-color: var(--primary-color); /* Already defined, ensuring it's used */
+}
+button.primary-action-btn:hover {
+    background-color: var(--primary-hover-color);
+}
+
+button.quick-save-to-catalog-btn, button.save-catalog-btn, button.reload-excel-btn {
+    background-color: var(--button-quick-save-bg); color: var(--text-on-primary);
+}
+button.quick-save-to-catalog-btn:hover, button.save-catalog-btn:hover, button.reload-excel-btn:hover {
+    background-color: var(--button-quick-save-hover-bg);
+}
+button.small-btn { padding: 6px 12px; font-size: 0.85em; height: auto; line-height: 1.4; }
+
+/* Tables */
+.table-responsive { overflow-x: auto; }
+.styled-table-container {
+    max-height: 500px; /* Adjust as needed */
+    overflow-y: auto;
+    border: 1px solid var(--border-color-soft);
+    border-radius: var(--border-radius);
+    margin-bottom: 15px;
+    position: relative; /* For sticky header positioning context */
+}
+
+table.styled-table { 
+    width: 100%; border-collapse: collapse; 
+    font-size: 0.9em; 
+}
+.styled-table th, .styled-table td { 
+    padding: 10px 12px; border: 1px solid var(--border-color-soft); text-align: left; 
+    vertical-align: middle;
+}
+.styled-table thead th { /* For sticky header */
+    position: -webkit-sticky; /* Safari */
+    position: sticky;
+    top: 0;
+    z-index: 1; /* Ensure header is above content */
+    background-color: var(--table-header-bg); /* Match existing header bg */
+    font-weight: 600; color: var(--text-secondary-color); 
+    white-space: nowrap;
+    font-size: 0.9em; 
+}
+/* Ensure the first header cell in a sticky header aligns correctly with non-sticky content */
+.styled-table thead th:first-child {
+    left: 0; /* Align with the start of the table if horizontal scrolling occurs */
+}
+
+.styled-table td { color: var(--text-primary-color); }
+.styled-table tbody tr:nth-child(even) { background-color: var(--table-row-even-bg); } 
+.styled-table tbody tr:hover { background-color: var(--table-row-hover-bg); } 
+
+/* Image Preview */
+.image-preview, #itemImagePreviewQuoteForm, #logoPreview {
+    max-width: 150px; max-height: 100px; display: none; margin-top: 10px;
+    border: 1px solid var(--border-color); border-radius: var(--border-radius); object-fit: cover;
+    background-color: var(--surface-color);
+}
+.item-image-preview-table {
+    max-width: 65px; max-height: 50px; border-radius: 4px; object-fit: cover;
+    margin: auto; display: block; 
+}
+.main-category-row { 
+    background-color: rgba(var(--primary-color-rgb), 0.1) !important; 
+}
+.main-category-row td { 
+    font-weight: 600; color: var(--primary-color); 
+    padding-top: 8px; padding-bottom: 8px;
+    font-size: 0.95em;
+}
+.main-category-roman-numeral, .main-category-name {
+    text-transform: uppercase;
+}
+.main-category-total { text-align: right; }
+
+/* Total Section */
+.total-section { 
+    margin-top: 25px; padding: 20px 25px; border: 1px solid var(--border-color-soft); 
+    border-radius: var(--border-radius); background-color: var(--total-section-bg); 
+}
+.total-section label { 
+    font-weight: 500; display: inline-block; min-width: 180px; 
+    color: var(--text-secondary-color);
+}
+.total-section span, .total-section .total-value-display { font-weight: 600; color: var(--text-primary-color); margin-left: 8px;}
+.total-section .grand-total label { font-size: 1.2em; color: var(--primary-color); font-weight: 700;} /* Prominent Grand Total */
+.total-section .grand-total span { font-size: 1.3em; color: var(--primary-color); font-weight: 700;} /* Prominent Grand Total */
+.total-section hr { border-top: 1px dashed var(--border-color); margin: 12px 0; }
+.total-section .form-group-inline { justify-content: flex-start; } 
+.total-section .form-group-inline input[type="number"] { width: 80px; height: 36px; padding: 0 8px; }
+.total-section .form-group-inline select { width: 90px; margin-left: 8px; height: 36px; padding: 0 8px; }
+
+/* Installments Section */
+.installments-section { margin-top: 25px; }
+.installments-section .section-sub-label { font-weight: bold; font-size: 1.05em; color: var(--primary-color); margin: 0; }
+.installments-container { 
+    padding: 15px; border: 1px solid var(--border-color-soft); 
+    border-radius: var(--border-radius); margin-top: 10px;
+    background-color: var(--item-entry-form-box-bg); /* Match item entry form bg */
+}
+.installment-row, .installment-row-header {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
+}
+.installment-row-header span { font-weight: 600; font-size: 0.85em; color: var(--text-secondary-color); text-transform: uppercase;}
+.installment-row-header span:nth-child(1), .installment-row input.installment-name { flex: 3; }
+.installment-row-header span:nth-child(2), .installment-row input.installment-value { flex: 1; text-align: right; }
+.installment-row-header span:nth-child(3), .installment-row select.installment-type { width: 70px; flex-shrink: 0; }
+.installment-row-header span:nth-child(4), .installment-row .installment-amount-display { flex: 1.5; text-align: right; font-weight: 500; }
+.installment-row .remove-installment-btn { 
+    background: none; border: none; color: var(--danger-color); font-size: 1.4em;
+    cursor: pointer; padding: 0 5px; line-height: 1; width: 30px; text-align: center;
+    height: auto; box-shadow: none;
+}
+.installment-row .remove-installment-btn:hover { color: var(--danger-hover-color); background-color: rgba(var(--danger-color-rgb, 239, 68, 68), 0.1); }
+body.dark-mode .installment-row .remove-installment-btn:hover { background-color: rgba(var(--dark-danger-color-rgb, 248,113,113), 0.15); }
+
+.installment-summary {
+    margin-top: 15px; padding-top: 10px; border-top: 1px dashed var(--border-color);
+    display: flex; justify-content: space-between; font-size: 0.9em;
+}
+.installment-summary span { color: var(--text-secondary-color); }
+.installment-summary strong { color: var(--text-primary-color); }
+
+
+/* Helper classes */
+.text-danger { color: var(--danger-color); }
+.text-success { color: var(--success-color); }
+.text-bold { font-weight: bold; }
+.strikethrough-price {
+    text-decoration: line-through;
+    color: var(--text-secondary-color);
+    font-size: 0.9em;
+}
+
+/* Item Grid for better form layout */
+.item-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px 22px; } /* Increased gap */
+.item-grid-col4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 18px 22px; } /* Increased gap */
+.dimensions-group .form-group { margin-bottom: 0; } 
+
+/* Dividers */
+.section-divider {
+    border: none;
+    border-top: 1px solid var(--border-color-soft);
+    margin: 25px 0;
+}
+.section-divider-accent {
+    border: none;
+    border-top: 1px solid var(--primary-color);
+    margin: 25px 0;
+    opacity: 0.5;
+}
+.total-section-minimal {
+    text-align: right;
+    padding: 8px 0;
+    font-size: 1em;
+}
+/* Table container for other tables that might need scrolling but not sticky header like main quote table */
+.table-container-scrollable { 
+    max-height: 400px; 
+    overflow-y: auto; 
+    border: 1px solid var(--border-color-soft); 
+    border-radius: var(--border-radius);
+    margin-bottom: 15px;
+}
+
+/* Icon Styles */
+.icon-svg { /* Base class for inline SVGs */
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    vertical-align: -0.125em; /* Adjust for better baseline alignment */
+    fill: currentColor;
+}
+button .icon-svg.icon-inline { /* For SVGs directly in buttons */
+    margin-right: 0.4em;
+}
+
+/* Help Icon Styling */
+.help-icon {
+    display: inline-flex; /* Use flex for centering SVG */
+    align-items: center;
+    justify-content: center;
+    width: 18px; /* Slightly larger for SVG */
+    height: 18px;
+    border-radius: 50%;
+    background-color: var(--border-color-soft);
+    color: var(--text-secondary-color); /* This will be inherited by SVG fill */
+    cursor: help;
+    margin-left: 5px;
+    vertical-align: middle;
+}
+.help-icon .icon-svg.icon-help {
+    width: 12px; /* Control SVG size within the span */
+    height: 12px;
+}
+body.dark-mode .help-icon {
+    background-color: var(--dark-border-color-soft);
+    color: var(--dark-text-secondary-color);
+}
+
+
+@media (max-width: 992px) { /* Adjust breakpoint */
+    .item-grid, .item-grid-col4 { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 768px) { /* Adjust breakpoint */
+    body.app-body { padding: 15px; }
+    .container { padding: 20px 25px; }
+    .app-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .app-header h1 { font-size: 1.6em; }
+    #auth-container { align-self: flex-end;} /* Align user info to the right on small screens */
+    .item-grid, .item-grid-col4 { grid-template-columns: 1fr; }
+    .tabs { justify-content: flex-start; overflow-x: auto;} /* Allow horizontal scroll for tabs */
+    .tab-button { padding: 8px 12px; font-size: 0.9em; white-space: nowrap; }
+    .form-actions, .quote-actions-footer { justify-content: center; }
+}
+
+/* Print specific styles */
+@media print {
+    body.app-body { padding: 0; background-color: var(--surface-color); }
+    .container { box-shadow: none; border: none; margin: 0; max-width: 100%; padding: 10mm; }
+    .no-print { display: none !important; }
+}
+
+/* Loader */
+.loader-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background-color: var(--loader-overlay-bg);
+    display: flex; justify-content: center; align-items: center; z-index: 10000;
+}
+.loader-spinner {
+    border: 5px solid var(--border-color-soft);
+    border-top: 5px solid var(--primary-color);
+    border-radius: 50%; width: 50px; height: 50px;
+    animation: spin 0.8s linear infinite;
+}
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+/* Notification System */
+#notification-container {
+    position: fixed; top: 20px; right: 20px; z-index: 10001;
+    display: flex; flex-direction: column; gap: 10px;
+}
+.toast {
+    padding: 12px 18px; border-radius: var(--border-radius); color: var(--text-on-primary);
+    font-size: 0.9em; box-shadow: var(--shadow-lg);
+    opacity: 0; transform: translateX(100%);
+    animation: slideInRight 0.4s forwards cubic-bezier(0.25, 0.8, 0.25, 1);
+    min-width: 260px;
+    background-color: var(--text-primary-color); /* Default toast color */
+}
+body.dark-mode .toast { /* Default dark mode toast color if not type-specific */
+    background-color: var(--dark-text-primary-color);
+    color: var(--dark-background-color);
+}
+
+.toast--info { background-color: var(--primary-color); color: var(--text-on-primary); }
+body.dark-mode .toast--info { background-color: var(--dark-primary-color); color: var(--dark-text-on-primary); }
+
+.toast--success { background-color: var(--success-color); color: var(--text-on-primary); }
+body.dark-mode .toast--success { background-color: var(--dark-success-color); color: var(--dark-text-on-primary); }
+
+.toast--error { background-color: var(--danger-color); color: var(--text-on-primary); }
+body.dark-mode .toast--error { background-color: var(--dark-danger-color); color: var(--dark-text-on-primary); }
+
+@keyframes slideInRight {
+    to { opacity: 1; transform: translateX(0); }
+}
+
+/* Auth Modal Specific Styles */
+.auth-modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background-color: var(--auth-modal-overlay-bg); 
+    display: flex; justify-content: center; align-items: center; z-index: 9999;
+    padding: 15px;
+}
+.auth-modal-content {
+    background-color: var(--surface-color);
+    padding: 30px 40px; 
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-lg);
+    width: 100%;
+    max-width: 420px; 
+    text-align: center;
+}
+.auth-modal-content h2 { margin-top: 0; margin-bottom: 10px; font-size: 1.6em;}
+.auth-modal-content p { margin-bottom: 20px; color: var(--text-secondary-color); font-size:0.95em; }
+.auth-modal-content .form-group { text-align: left; }
+.auth-modal-content button[type="submit"] { width: 100%; padding: 11px; font-size: 1em; }
+.auth-switch { margin-top: 20px; font-size: 0.9em; }
+.auth-switch a { color: var(--primary-color); text-decoration: none; font-weight: 500; }
+.auth-switch a:hover { text-decoration: underline; color: var(--primary-hover-color); }
+.error-message { color: var(--danger-color); font-size: 0.85em; margin-top: -10px; margin-bottom: 15px; min-height:1.2em; }
+.password-wrapper { position: relative; }
+.password-toggle {
+    position: absolute;
+    top: 50%;
+    right: 1px; 
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--text-secondary-color);
+    cursor: pointer;
+    font-size: 1.2em; 
+    padding: 8px; 
+    line-height: 1; 
+    border-radius: var(--border-radius);
+}
+.password-toggle:hover {
+    background-color: rgba(var(--primary-color-rgb), 0.1);
+}
+
+
+/* Admin Tab Specific Styles */
+.admin-section-box {
+    border: 1px solid var(--border-color-soft);
+    padding: 20px;
+    border-radius: var(--border-radius);
+    background-color: var(--item-entry-form-box-bg); 
+    margin-bottom: 25px; /* Added margin for separation */
+}
+.admin-section-box:last-child {
+    margin-bottom: 0;
+}
+.account-details-box {
+    padding: 15px;
+    border: 1px solid var(--border-color-soft);
+    border-radius: var(--border-radius);
+    background-color: var(--surface-color);
+}
+#admin-user-details p, .account-details-box p { margin: 5px 0; font-size: 0.95em; }
+#admin-user-details p strong, .account-details-box p strong { color: var(--text-primary-color); font-weight: 500; }
+.status-ok { color: var(--success-color); }
+.status-warning { color: var(--warning-color); }
+.status-expired { color: var(--danger-color); }
+
+.status-message { /* For admin update status messages */
+    font-size:0.9em; 
+    margin-top:8px;
+    font-weight: 500;
+}
+#admin-stats-display p {
+    margin: 5px 0;
+    font-size: 0.95em;
+    color: var(--text-secondary-color);
+}
+#admin-stats-display p strong {
+    color: var(--text-primary-color);
+    font-weight: 600;
+}
+.admin-note {
+    font-size: 0.8em;
+    color: var(--text-placeholder-color);
+    margin-top: 10px;
+    display: block;
+}
+
+
+/* Item name suggestions */
+.suggestions-container {
+    position: absolute;
+    background-color: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-top: none;
+    z-index: 100;
+    max-height: 200px; /* Reduced height */
+    overflow-y: auto;
+    box-shadow: var(--shadow-md);
+    border-radius: 0 0 var(--border-radius) var(--border-radius);
+    display: none; 
+    width: calc(100% - 2px); /* Match input width, accounting for border */
+    left: 1px;
+}
+.suggestion-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 0.9em;
+    border-bottom: 1px solid var(--border-color-soft);
+}
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+.suggestion-item:hover {
+    background-color: var(--table-row-hover-bg); 
+}
+.suggestion-item strong { /* For matched text */
+    color: var(--primary-color);
+    font-weight: 600;
+}
+.suggestion-item .suggestion-source, .suggestion-item .suggestion-details {
+    font-size: 0.85em;
+    color: var(--text-secondary-color);
+    display: block;
+    margin-top: 1px;
+}
+
+
+/* Quote item specific styles for name/spec display in table */
+#quoteTablePreview td.item-name-spec-cell {
+    line-height: 1.4;
+}
+#quoteTablePreview .item-name-display {
+    display: block;
+    font-weight: 600;
+    color: var(--text-primary-color);
+    margin-bottom: 4px; 
+    font-size: 1em; 
+}
+#quoteTablePreview .item-dimensions-display,
+#quoteTablePreview .item-spec-display {
+    display: block;
+    font-size: 0.85em;
+    color: var(--text-secondary-color);
+    font-style: italic;
+    margin-top: 2px;
+}
+#quoteTablePreview .item-notes-cell {
+    font-size: 0.85em; 
+    color: var(--text-secondary-color); /* Adjusted for better theme consistency */
+    white-space: pre-wrap; 
+    max-width: 200px; 
+    word-wrap: break-word;
+}
+
+
+/* Quote Item Action Trigger & Menu */
+.action-trigger-cell, .action-trigger-cell-header { /* Generic class for all tables */
+    padding: 0 !important; 
+    text-align: center !important;
+    vertical-align: middle !important;
+}
+.action-trigger { /* Generic class for all trigger buttons */
+    background: none;
+    border: none;
+    color: var(--text-secondary-color);
+    font-size: 1.3em; /* Larger for easier clicking */
+    font-weight: bold;
+    cursor: pointer;
+    padding: 6px 10px; /* More clickable area */
+    line-height: 1;
+    border-radius: var(--border-radius);
+    height: auto; /* Override button default height */
+    box-shadow: none;
+}
+.action-trigger:hover {
+    background-color: var(--border-color-soft);
+    color: var(--primary-color);
+}
+
+.actions-menu { /* Renamed from .quote-actions-menu */
+    position: absolute;
+    background-color: var(--surface-color);
+    border: 1px solid var(--border-color); 
+    border-radius: var(--border-radius); 
+    box-shadow: var(--shadow-lg); 
+    z-index: 1000;
+    padding: 6px 0; 
+    display: flex;
+    flex-direction: column;
+    min-width: 180px; /* Standardized min-width */
+}
+.actions-menu-item { /* Renamed */
+    background-color: transparent;
+    color: var(--text-primary-color);
+    padding: 9px 14px; /* Slightly more padding */
+    text-align: left;
+    border: none;
+    border-radius: 0; 
+    font-size: 0.9em;
+    font-weight: 500; 
+    display: flex; 
+    align-items: center; 
+    gap: 8px; /* Standard gap */
+    height: auto; 
+    box-shadow: none;
+    width: 100%; 
+    transition: background-color 0.15s, color 0.15s; /* Smooth transition */
+}
+.actions-menu-item .menu-item-icon-svg { /* For SVG icons in menu */
+    width: 1.1em; 
+    height: 1.1em;
+    fill: var(--text-secondary-color); 
+    transition: fill 0.15s;
+    flex-shrink: 0; /* Prevent icon from shrinking */
+}
+.actions-menu-item .menu-item-icon { /* Hide old text/emoji icon placeholder if any */
+    display: none;
+}
+
+.actions-menu-item:hover {
+    background-color: var(--primary-color);
+    color: var(--text-on-primary);
+}
+.actions-menu-item:hover .menu-item-icon-svg {
+    fill: var(--text-on-primary); /* Change SVG fill color on hover */
+}
+.actions-menu-item.delete-btn:hover { 
+    background-color: var(--danger-color);
+    color: var(--text-on-primary);
+}
+.actions-menu-item.save-btn:hover, 
+.actions-menu-item.costing-btn:hover,
+.actions-menu-item.load-btn:hover, /* For load actions */
+.actions-menu-item.duplicate-btn:hover { /* For duplicate actions */
+    background-color: var(--success-color); /* Example, can be customized */
+    color: var(--text-on-primary);
+}
+
+
+/* Setting Group Box Style */
+.setting-group-box {
+    border: 1px solid var(--border-color-soft);
+    padding: 15px 20px;
+    border-radius: var(--border-radius);
+    margin-bottom: 20px;
+    background-color: var(--item-entry-form-box-bg); /* Use item entry form bg for consistency */
+}
+.setting-group-label {
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 10px;
+    display: block;
+    font-size: 1em;
+}
+.checkbox-group label {
+    font-weight: normal; 
+    font-size: 0.95em;
+    display: flex;
+    align-items: center;
+    color: var(--text-primary-color);
+}
+.checkbox-group input[type="checkbox"] {
+    margin-right: 8px; 
+    height: 1em; width: 1em; 
+    accent-color: var(--primary-color);
+}
+.setting-group-box .form-group { 
+    margin-bottom: 10px; 
+}
+.setting-group-box input[type="range"] {
+    padding: 0; 
+    height: auto; 
+}
+
+/* Status badge for saved quotes */
+.status-badge {
+    padding: 4px 10px;
+    border-radius: var(--border-radius);
+    font-size: 0.8em;
+    font-weight: 600;
+    color: white;
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.status-draft { background-color: #6B7280; } 
+body.dark-mode .status-draft { background-color: #9CA3AF; color: #1F2937; }
+
+.status-sent { background-color: var(--primary-color); } 
+body.dark-mode .status-sent { background-color: var(--dark-primary-color); color: var(--dark-text-on-primary); }
+
+.status-accepted { background-color: var(--success-color); } 
+body.dark-mode .status-accepted { background-color: var(--dark-success-color); color: var(--dark-text-on-primary); }
+
+.status-rejected { background-color: var(--danger-color); } 
+body.dark-mode .status-rejected { background-color: var(--dark-danger-color); color: var(--dark-text-on-primary); }
+
+.status-expired { background-color: var(--warning-color); color: #1F2937; } 
+body.dark-mode .status-expired { background-color: var(--dark-warning-color); color: #1F2937; }
+
+
+.status-cell {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.status-select-action { 
+    font-size: 0.85em;
+    padding: 4px 6px;
+    height: auto;
+    border-radius: 4px;
+    background-color: var(--border-color-soft); /* Lighten for better visibility */
+    color: var(--text-secondary-color);
+    border: 1px solid var(--border-color);
+}
+.status-select-action:hover {
+    border-color: var(--primary-color);
+}
+
+/* Specific section styling */
+.quote-general-info, .catalog-import-section, .catalog-filter-section, 
+.catalog-preview-section, .catalog-management-forms, .company-info-settings, 
+.pdf-customization-settings { /* Removed .admin-user-search which is now part of admin-section-box */
+    margin-bottom: 25px;
+}
+.template-section {
+    margin-bottom: 30px;
+}
+.template-section h3 {
+    margin-bottom: 10px;
+    font-size: 1.15em;
+}
+
+
+section > h2, section > h3 {
+    margin-top: 0; /* Remove top margin for h2/h3 if they are direct children of section */
+}
+
+/* Ensure datalist options are not overly styled by global input styles */
+datalist option {
+    padding: 5px; 
+    font-size: 0.9em; 
+}
+
+/* Costing Tab Collapsible Sections */
+.costing-section-summary {
+    cursor: pointer;
+    padding: 10px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.costing-section-summary h3 {
+    margin: 0; 
+    color: var(--primary-color); 
+    font-size: 1.25em; 
+    font-weight: 600; 
+    display: flex;
+    align-items: center;
+    flex-grow: 1; /* Allow h3 to take space */
+}
+.costing-section-summary h3:hover {
+    color: var(--primary-hover-color);
+}
+
+.summary-toggle-svg { /* Chevron icon styling */
+    width: 1em;
+    height: 1em;
+    fill: var(--collapsible-summary-icon-color);
+    margin-left: 10px;
+    transition: transform 0.2s ease-in-out;
+    flex-shrink: 0; /* Prevent icon from shrinking */
+}
+.collapsible-form-section[open] > .costing-section-summary .summary-toggle-svg {
+    transform: rotate(90deg);
+}
+
+/* Hide old text-based summary toggle if it was handled by JS before */
+.summary-toggle-icon { 
+    display: none; 
+}
+
+.collapsible-form-section > summary {
+    list-style: none; /* For Firefox */
+}
+.collapsible-form-section > summary::-webkit-details-marker {
+    display: none; /* For Chrome/Safari */
+}
+.collapsible-form-section > summary:hover .summary-toggle-svg {
+    fill: var(--collapsible-summary-icon-hover-color);
+}
+
+/* Profit Analysis Section (Quote Tab) */
+.profit-analysis-section {
+    margin-top: 20px;
+    padding: 15px 20px;
+    background-color: var(--item-entry-form-box-bg);
+    border: 1px solid var(--border-color-soft);
+    border-radius: var(--border-radius);
+    font-size: 0.9em;
+}
+.profit-analysis-section summary.profit-analysis-summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--primary-color);
+    list-style: none; /* Remove default marker */
+    display: flex; /* For alignment */
+    align-items: center; /* For alignment */
+}
+.profit-analysis-section summary.profit-analysis-summary::-webkit-details-marker {
+    display: none; /* Remove default marker for Webkit */
+}
+/* No need for ::before if SVG is directly in summary */
+.profit-analysis-section[open] summary.profit-analysis-summary .summary-toggle-svg {
+    transform: rotate(90deg);
+}
+.profit-analysis-section[open] summary.profit-analysis-summary {
+    margin-bottom: 10px; /* Space when open */
+}
+
+.profit-analysis-section .profit-analysis-content {
+    padding-left: 15px; /* Indent content when open */
+    border-left: 2px solid var(--border-color-soft);
+}
+
+.profit-analysis-section h3 {
+    margin-top: 0;
+    margin-bottom: 0; /* Adjusted for summary click */
+    font-size: 1.1em;
+    flex-grow: 1; /* Allow h3 to take space */
+}
+.profit-analysis-section p {
+    margin: 5px 0;
+    color: var(--text-secondary-color);
+}
+.profit-analysis-section p strong {
+    color: var(--text-primary-color);
+    font-weight: 600;
+}
+.profit-analysis-section small {
+    display: block;
+    margin-top: 8px;
+    color: var(--text-placeholder-color);
+}
+
+/* What-If Scenario Section (Costing Tab) */
+.what-if-scenario-section {
+    margin-top: 25px;
+    padding: 20px 25px;
+    background-color: var(--item-entry-form-box-bg);
+    border: 1px solid var(--border-color-soft);
+    border-radius: var(--border-radius);
+}
+.what-if-scenario-section h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 1.15em;
+    color: var(--primary-color);
+}
+.what-if-scenario-section p em {
+    font-size: 0.9em;
+    color: var(--text-secondary-color);
+    margin-bottom: 15px;
+    display: block;
+}
+.what-if-scenario-section .form-group label {
+    font-size: 0.85em; /* Smaller labels for compact layout */
+}
+.what-if-scenario-section .form-group input[type="number"] {
+    height: 38px; /* Slightly smaller input fields */
+}
+.what-if-results p {
+    font-size: 1em;
+    margin: 8px 0;
+    color: var(--text-secondary-color);
+}
+.what-if-results p strong {
+    color: var(--text-primary-color);
+    font-weight: 600;
+}
+#whatIfDifferenceSpan.positive-diff {
+    color: var(--success-color);
+}
+#whatIfDifferenceSpan.negative-diff {
+    color: var(--danger-color);
+}
