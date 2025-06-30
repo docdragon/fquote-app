@@ -1,4 +1,3 @@
-
 // api/generate-pdf.js
 // Vercel Serverless Function to generate professional PDFs using Puppeteer.
 
@@ -9,308 +8,384 @@ const chromium = require('@sparticuz/chromium');
 const { formatDate, formatCurrency, numberToRoman } = require('./_utils-for-api');
 
 /**
- * Generates the complete HTML content for the PDF.
- * This function creates a professional-looking quote document.
+ * Generates the complete HTML content for the PDF, mimicking the app's UI.
  * @param {object} quoteData The full data object for the quote.
  * @returns {string} A string containing the full HTML document.
  */
 function getQuoteHtml(quoteData) {
     const { companySettings, quoteId, customerInfo, items, mainCategories, totals, installments } = quoteData;
 
+    const createItemRowHTML = (item, itemIndex) => {
+        let displayNameCellContent = `<div class="item-name-display">${(item.name || '[Chưa có tên]').toUpperCase()}</div>`;
+        let dimParts = [];
+        if (item.length) dimParts.push(`D ${item.length}mm`);
+        if (item.height) dimParts.push(`C ${item.height}mm`);
+        if (item.depth) dimParts.push(`S ${item.depth}mm`);
+        if (dimParts.length > 0) {
+            displayNameCellContent += `<div class="item-dimensions-display">KT: ${dimParts.join(' x ')}</div>`;
+        }
+        if (item.spec) {
+            displayNameCellContent += `<div class="item-spec-display">${item.spec}</div>`;
+        }
+    
+        let priceCellContent = `<strong>${formatCurrency(item.price || 0, false)}</strong>`;
+        if ((item.itemDiscountAmount || 0) > 0) {
+            let discountText = '';
+            if (item.itemDiscountType === 'percent' && (item.itemDiscountValue || 0) > 0) {
+                discountText = `<span class="item-discount-percent">(-${item.itemDiscountValue}%)</span>`;
+            }
+            priceCellContent = `
+                <span class="strikethrough-price">${formatCurrency(item.originalPrice || 0, false)}</span>
+                <br>
+                <strong>${formatCurrency(item.price || 0, false)}</strong>${discountText}
+            `;
+        }
+        
+        let displayedMeasureText = '';
+        if (item.calculatedMeasure && typeof item.calculatedMeasure === 'number' && item.calcType !== 'unit') {
+            let measureInMeters = item.calculatedMeasure;
+            if (item.calcType === 'length') measureInMeters /= 1000;
+            else if (item.calcType === 'area') measureInMeters /= 1000000;
+            else if (item.calcType === 'volume') measureInMeters /= 1000000000;
+            displayedMeasureText = `${parseFloat(measureInMeters.toFixed(4)).toLocaleString('vi-VN')}`;
+        }
+    
+        const imgSrc = item.imageDataUrl || '';
+    
+        return `
+            <tr class="item-row">
+                <td class="center">${itemIndex}</td>
+                <td class="center">${imgSrc ? `<img src="${imgSrc}" class="item-image-pdf" alt="Item image">` : ''}</td>
+                <td class="item-name-spec-cell">${displayNameCellContent}</td>
+                <td class="center">${item.unit || ''}</td>
+                <td class="right">${displayedMeasureText}</td>
+                <td class="right">${(item.quantity || 0).toLocaleString('vi-VN', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}</td>
+                <td class="right price-cell">${priceCellContent}</td>
+                <td class="right">${formatCurrency(item.lineTotal || 0, false)}</td>
+                <td class="notes-cell">${item.notes || ''}</td>
+            </tr>
+        `;
+    };
+
     const renderItems = () => {
         let html = '';
-        const groupedItems = new Map([['__none__', []]]);
-
-        if (mainCategories) {
-            mainCategories.forEach(cat => groupedItems.set(cat.id, []));
-        }
+        const groupedItems = new Map();
+        const itemsWithoutCategory = [];
 
         items.forEach(item => {
-            const catId = item.mainCategoryId && groupedItems.has(item.mainCategoryId) ? item.mainCategoryId : '__none__';
-            groupedItems.get(catId).push(item);
+            if (item.mainCategoryId && mainCategories.some(cat => cat.id === item.mainCategoryId)) {
+                if (!groupedItems.has(item.mainCategoryId)) {
+                    groupedItems.set(item.mainCategoryId, []);
+                }
+                groupedItems.get(item.mainCategoryId).push(item);
+            } else {
+                itemsWithoutCategory.push(item);
+            }
         });
 
-        let categoryCounter = 0;
         let itemCounter = 0;
+        let categoryCounter = 0;
 
-        const mapItemToRow = (item) => {
-            itemCounter++;
-            let displayedMeasureText = '';
-            if (item.calculatedMeasure && typeof item.calculatedMeasure === 'number' && item.calcType !== 'unit') {
-                let measureValue = item.calculatedMeasure;
-                if (item.calcType === 'length') measureValue /= 1000;
-                else if (item.calcType === 'area') measureValue /= 1000000;
-                else if (item.calcType === 'volume') measureValue /= 1000000000;
-                displayedMeasureText = `${parseFloat(measureValue.toFixed(4)).toLocaleString('vi-VN')}`;
-            }
-
-            let dimParts = [];
-            if (item.length) dimParts.push(`D ${item.length}mm`);
-            if (item.height) dimParts.push(`C ${item.height}mm`);
-            if (item.depth) dimParts.push(`S ${item.depth}mm`);
-            const dimensionsString = dimParts.join(' x ');
-
-            return `
-                <tr class="item-row">
-                    <td class="center">${itemCounter}</td>
-                    <td>
-                        <div class="item-name">${item.name.toUpperCase()}</div>
-                        ${dimensionsString ? `<div class="item-spec">KT: ${dimensionsString}</div>` : ''}
-                        ${item.spec ? `<div class="item-spec">${item.spec}</div>` : ''}
-                    </td>
-                    <td class="center">${item.unit || ''}</td>
-                    <td class="right">${displayedMeasureText}</td>
-                    <td class="right">${(item.quantity || 0).toLocaleString('vi-VN', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}</td>
-                    <td class="right">${formatCurrency(item.price || 0, false)}</td>
-                    <td class="right">${formatCurrency(item.lineTotal || 0, false)}</td>
-                    <td>${item.notes || ''}</td>
-                </tr>
-            `;
-        };
-        
-        const processCategory = (itemsInCategory) => {
-            itemsInCategory.forEach(item => {
-                html += mapItemToRow(item);
-            });
-        };
-        
-        if (mainCategories) {
-            mainCategories.forEach(category => {
+        mainCategories.forEach(category => {
+            if (groupedItems.has(category.id)) {
+                categoryCounter++;
                 const itemsInCategory = groupedItems.get(category.id);
-                if (itemsInCategory && itemsInCategory.length > 0) {
-                    categoryCounter++;
-                    const categoryTotal = itemsInCategory.reduce((sum, item) => sum + (item.lineTotal || 0), 0);
-                    html += `
-                        <tr class="category-row">
-                            <td class="category-marker">${numberToRoman(categoryCounter)}.</td>
-                            <td colspan="5" class="category-name">${category.name.toUpperCase()}</td>
-                            <td class="right category-total">${formatCurrency(categoryTotal, false)}</td>
-                            <td></td>
-                        </tr>
-                    `;
-                    processCategory(itemsInCategory);
-                }
+                const categoryTotal = itemsInCategory.reduce((sum, item) => sum + (item.lineTotal || 0), 0);
+                
+                html += `
+                    <tr class="main-category-row">
+                        <td class="main-category-roman-numeral">${numberToRoman(categoryCounter)}</td>
+                        <td colspan="6" class="main-category-name">${category.name.toUpperCase()}</td>
+                        <td class="main-category-total">${formatCurrency(categoryTotal, false)}</td>
+                        <td></td>
+                    </tr>
+                `;
+                
+                itemsInCategory.forEach(item => {
+                    itemCounter++;
+                    html += createItemRowHTML(item, itemCounter);
+                });
+            }
+        });
+
+        if (itemsWithoutCategory.length > 0) {
+            itemsWithoutCategory.forEach(item => {
+                itemCounter++;
+                html += createItemRowHTML(item, itemCounter);
             });
         }
-        
-        const itemsWithoutCategory = groupedItems.get('__none__');
-        if (itemsWithoutCategory && itemsWithoutCategory.length > 0) {
-            if (html.length > 0) {
-                html += `<tr><td colspan="8" style="padding: 4px;"></td></tr>`;
-            }
-            processCategory(itemsWithoutCategory);
-        }
-
         return html;
     };
     
     const renderInstallments = () => {
-        if (!installments || !installments.enabled || installments.data.length === 0) return '';
-        let installmentHtml = `
-            <div class="terms-section">
-                <h3>Lịch thanh toán</h3>
-                <ol class="installments-list">
+        if (!installments || !installments.enabled || installments.data.length === 0) {
+            return '';
+        }
+
+        let totalPercent = 0;
+        let totalAmount = 0;
+        const grandTotal = totals.grandTotal;
+
+        const rows = installments.data.map((inst, index) => {
+             const amount = inst.value > 0
+                ? (inst.type === 'percent' ? (grandTotal * inst.value) / 100 : inst.value)
+                : 0;
+            totalAmount += amount;
+            if(inst.type === 'percent') totalPercent += inst.value;
+            return `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>${inst.name}</td>
+                    <td class="right">${inst.type === 'percent' ? `${inst.value}%` : formatCurrency(inst.value)}</td>
+                    <td class="right">${formatCurrency(amount)}</td>
+                </tr>
+            `;
+        }).join('');
+
+        const remainingAmount = grandTotal - totalAmount;
+        
+        return `
+            <section class="installments-section-pdf">
+                <h3>LỊCH THANH TOÁN</h3>
+                <table class="installments-table-pdf">
+                    <thead>
+                        <tr>
+                            <th>Đợt</th>
+                            <th>Nội dung</th>
+                            <th class="right">Giá trị</th>
+                            <th class="right">Thành tiền</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rows}</tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3" class="right"><strong>TỔNG CỘNG CÁC ĐỢT</strong></td>
+                            <td class="right"><strong>${formatCurrency(totalAmount)}</strong></td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" class="right"><strong>CÒN LẠI</strong></td>
+                            <td class="right"><strong>${formatCurrency(remainingAmount)}</strong></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </section>
         `;
-        installments.data.forEach(inst => {
-            const amount = inst.type === 'percent' 
-                ? (totals.grandTotal * inst.value) / 100 
-                : inst.value;
-            installmentHtml += `<li>${inst.name}: <strong>${formatCurrency(amount)}</strong> (${inst.value}${inst.type === 'percent' ? '%' : ' VNĐ'})</li>`;
-        });
-        installmentHtml += `</ol></div>`;
-        return installmentHtml;
     };
+
+    const bankInfoHtml = companySettings.bankAccount 
+        ? companySettings.bankAccount.split('\n').map(line => `<p>${line}</p>`).join('') 
+        : '';
 
     return `
         <!DOCTYPE html>
         <html>
         <head>
             <meta charset="UTF-8">
-            <title>${(companySettings.printOptions?.title || 'Báo Giá')} - ${quoteId}</title>
+            <title>${(companySettings.printOptions?.title || 'BÁO GIÁ')} - ${quoteId}</title>
             <style>
-                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+                :root {
+                    --primary-color: #3B82F6; 
+                    --text-primary-color: #1F2937; 
+                    --text-secondary-color: #4B5563; 
+                    --border-color: #D1D5DB; 
+                    --border-color-soft: #E5E7EB; 
+                    --surface-color: #FFFFFF;
+                    --table-row-hover-bg: #EFF6FF;
+                    --primary-color-rgb: 59,130,246; 
+                }
                 body {
                     font-family: 'Inter', sans-serif;
-                    font-size: 10pt;
-                    color: #333;
+                    font-size: 9pt;
+                    color: var(--text-primary-color);
                     -webkit-print-color-adjust: exact;
+                    line-height: 1.5;
+                    background-color: var(--surface-color);
                 }
                 .page {
                     width: 210mm;
-                    height: 297mm;
+                    min-height: 297mm;
                     box-sizing: border-box;
-                    padding: 40px;
+                    padding: 12mm 15mm;
                 }
-                .header {
+                .header-info {
                     display: flex;
                     justify-content: space-between;
                     align-items: flex-start;
-                    padding-bottom: 20px;
-                    border-bottom: 2px solid #eee;
+                    margin-bottom: 5mm;
                 }
-                .company-info { flex: 2; }
-                .company-info h2 {
-                    margin: 0;
-                    font-size: 14pt;
-                    font-weight: 700;
-                    color: #0056b3;
+                .company-info-pdf { flex-grow: 1; }
+                .company-logo-pdf { flex-shrink: 0; max-width: 80px; margin-left: 10mm; }
+                .company-logo-pdf img { max-width: 100%; height: auto; object-fit: contain; }
+                
+                h1, h2, h3 { font-weight: 600; margin: 0; }
+                h1.quote-title {
+                    font-size: 20pt;
+                    text-align: center;
+                    margin: 8mm 0;
+                    text-transform: uppercase;
                 }
-                .company-info p { margin: 4px 0; font-size: 9pt; color: #555;}
-                .company-logo { flex: 1; text-align: right; max-height: 80px;}
-                .company-logo img { max-height: 70px; max-width: 180px; object-fit: contain; }
-                .quote-title-section { text-align: center; margin: 30px 0; }
-                .quote-title-section h1 { margin: 0; font-size: 24pt; letter-spacing: 1px; }
-                .quote-title-section p { margin: 5px 0; color: #666; }
-                .customer-info {
+                .company-info-pdf h2 { font-size: 14pt; color: var(--primary-color); }
+                .company-info-pdf p { margin: 1mm 0; font-size: 9pt; color: var(--text-secondary-color); }
+                
+                .customer-info-pdf {
                     display: flex;
-                    justify-content: space-between;
-                    background-color: #f9f9f9;
-                    padding: 15px 20px;
+                    border: 1px solid var(--border-color-soft);
                     border-radius: 8px;
-                    margin-bottom: 25px;
+                    padding: 3mm 4mm;
+                    margin-bottom: 8mm;
                 }
-                .customer-info div { font-size: 9.5pt; }
-                .customer-info strong { font-weight: 700; color: #333; }
-                .items-table {
-                    width: 100%;
-                    border-collapse: collapse;
-                    margin-bottom: 25px;
-                }
-                .items-table th, .items-table td {
-                    border: 1px solid #e0e0e0;
-                    padding: 8px 10px;
-                    text-align: left;
-                    vertical-align: top;
-                }
-                .items-table th {
-                    background-color: #0056b3;
-                    color: white;
-                    font-weight: 700;
-                    font-size: 9.5pt;
-                }
-                .items-table .center { text-align: center; }
-                .items-table .right { text-align: right; }
-                .item-row .item-name { font-weight: 700; text-transform: uppercase; margin-bottom: 4px;}
-                .item-row .item-spec { font-size: 8.5pt; color: #555; font-style: italic; }
-                .category-row { background-color: #f0f6ff; }
-                .category-row td {
-                    padding: 6px 10px;
-                    font-weight: 700;
-                    color: #0056b3;
-                    border-left: 3px solid #0056b3;
-                }
-                .category-row .category-total { font-size: 11pt; }
-                .summary-section {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: flex-start;
-                    margin-top: 20px;
-                }
-                .notes-section { flex: 1.5; font-size: 9pt; color: #444; }
-                .notes-section h3 { margin-top: 0; font-size: 11pt; color: #0056b3; border-bottom: 1px solid #eee; padding-bottom: 5px;}
-                .totals-section { flex: 1; max-width: 300px; }
-                .totals-table { width: 100%; }
-                .totals-table td { padding: 6px 5px; font-size: 10pt; }
-                .totals-table .label { font-weight: 500; color: #444; text-align: right;}
-                .totals-table .value { font-weight: 700; text-align: right; }
-                .grand-total { border-top: 2px solid #333; margin-top: 5px; padding-top: 5px;}
-                .grand-total .label, .grand-total .value { font-size: 14pt; color: #0056b3; }
-                .signature-section {
-                    margin-top: 70px;
-                    text-align: right;
-                }
-                .signature-section .signature-box {
-                    display: inline-block;
+                .customer-info-pdf .col { width: 50%; }
+                .customer-info-pdf p { margin: 1mm 0; }
+
+                table { width: 100%; border-collapse: collapse; font-size: 9pt; }
+                th, td { padding: 8px 10px; border: 1px solid var(--border-color-soft); text-align: left; vertical-align: middle; }
+                thead th {
+                    background-color: #F3F4F6;
+                    font-weight: 600; color: var(--text-secondary-color); 
+                    font-size: 8.5pt;
                     text-align: center;
                 }
-                .signature-section p { margin: 2px 0; font-size: 10pt; }
-                .signature-section .creator-name { margin-top: 50px; font-weight: 700; }
-                .terms-section h3 { margin-top: 0; font-size: 11pt; color: #0056b3; border-bottom: 1px solid #eee; padding-bottom: 5px;}
-                .installments-list { padding-left: 20px; margin: 5px 0; font-size: 9pt; }
-                .installments-list li { margin-bottom: 4px; }
+                .center { text-align: center; }
+                .right { text-align: right; }
+                
+                .main-category-row { background-color: rgba(var(--primary-color-rgb), 0.1) !important; }
+                .main-category-row td { font-weight: 600; color: var(--primary-color); font-size: 9.5pt; }
+                .main-category-roman-numeral { text-align: center; }
+                .main-category-name { text-transform: uppercase; }
+                .main-category-total { text-align: right; }
+                
+                .item-image-pdf { max-width: 60px; max-height: 45px; border-radius: 4px; object-fit: contain; margin: auto; display: block; }
+                .item-name-spec-cell { line-height: 1.4; }
+                .item-name-display { font-weight: 600; color: var(--text-primary-color); margin-bottom: 3px; font-size: 9pt; }
+                .item-dimensions-display, .item-spec-display { font-size: 8pt; color: var(--text-secondary-color); font-style: italic; margin-top: 1px; }
+                .notes-cell { font-size: 8pt; color: var(--text-secondary-color); white-space: pre-wrap; word-wrap: break-word; }
+                .price-cell { line-height: 1.4; }
+                .strikethrough-price { text-decoration: line-through; color: var(--text-secondary-color); font-size: 8.5pt; }
+                .item-discount-percent { font-size: 8pt; color: #EF4444; font-style: italic; }
+
+                .summary-section-pdf {
+                    page-break-inside: avoid;
+                    margin-top: 5mm;
+                    display: flex;
+                    justify-content: flex-end;
+                }
+                .totals-box {
+                    width: 50%;
+                    max-width: 90mm;
+                    border: 1px solid var(--border-color-soft);
+                    border-radius: 8px;
+                    padding: 3mm;
+                }
+                .totals-box table { border: none; }
+                .totals-box td, .totals-box th { border: none; padding: 4px; }
+                .totals-box .label { text-align: right; padding-right: 3mm; font-weight: 500; color: var(--text-secondary-color);}
+                .totals-box .value { text-align: right; font-weight: 600; }
+                .totals-box hr { border: none; border-top: 1px solid var(--border-color-soft); margin: 4px 0; }
+                .totals-box .grand-total .label, .totals-box .grand-total .value { font-size: 11pt; font-weight: 700; color: var(--primary-color); }
+                
+                .installments-section-pdf { margin-top: 8mm; page-break-inside: avoid; }
+                .installments-section-pdf h3 { font-size: 11pt; margin-bottom: 3mm; border-bottom: 1px solid var(--border-color); padding-bottom: 2mm; }
+                .installments-table-pdf th { font-weight: 600; }
+                .installments-table-pdf tfoot td { background-color: #F3F4F6; }
+
+                .footer-notes-section {
+                    margin-top: 10mm;
+                    page-break-inside: avoid;
+                }
+                .footer-notes-section p { margin: 0 0 1mm 0; }
+                .signature-section {
+                    display: flex;
+                    justify-content: flex-end;
+                    margin-top: 15mm;
+                }
+                .signature-box { text-align: center; width: 40%; }
+                .signature-box p { margin: 0; }
+                .signature-box .creator-name { margin-top: 15mm; font-weight: 600; }
             </style>
         </head>
         <body>
             <div class="page">
-                <div class="header">
-                    <div class="company-info">
-                        <h2>${(companySettings.name || 'TÊN CÔNG TY').toUpperCase()}</h2>
-                        <p>${companySettings.address || 'Địa chỉ công ty'}</p>
-                        <p>ĐT: ${companySettings.phone || '[SĐT]'} | Email: ${companySettings.email || '[Email]'}</p>
-                        ${companySettings.taxId ? `<p>MST: ${companySettings.taxId}</p>` : ''}
+                <header class="header-info">
+                    <div class="company-info-pdf">
+                        <h2>${(companySettings.name || '').toUpperCase()}</h2>
+                        <p>${companySettings.address || ''}</p>
+                        <p><strong>ĐT:</strong> ${companySettings.phone || ''} | <strong>Email:</strong> ${companySettings.email || ''}</p>
+                        ${companySettings.taxId ? `<p><strong>MST:</strong> ${companySettings.taxId}</p>` : ''}
                     </div>
-                    ${companySettings.logoDataUrl ? `<div class="company-logo"><img src="${companySettings.logoDataUrl}" alt="Logo"></div>` : ''}
-                </div>
+                    ${companySettings.logoDataUrl ? `<div class="company-logo-pdf"><img src="${companySettings.logoDataUrl}" alt="Logo"></div>` : ''}
+                </header>
+                
+                <h1 class="quote-title">${(companySettings.printOptions?.title || 'BÁO GIÁ')}</h1>
 
-                <div class="quote-title-section">
-                    <h1>${(companySettings.printOptions?.title || 'BÁO GIÁ').toUpperCase()}</h1>
-                    <p>Số: ${quoteId} | Ngày: ${formatDate(customerInfo.date)}</p>
-                </div>
-
-                <div class="customer-info">
-                    <div class="customer-details">
-                        <strong>Khách hàng:</strong> ${customerInfo.name || '[Tên khách hàng]'}<br>
-                        <strong>Địa chỉ:</strong> ${customerInfo.address || '[Địa chỉ]'}
+                <section class="customer-info-pdf">
+                    <div class="col">
+                        <p><strong>Khách hàng:</strong> ${customerInfo.name || ''}</p>
+                        <p><strong>Địa chỉ:</strong> ${customerInfo.address || ''}</p>
                     </div>
-                </div>
+                    <div class="col">
+                        <p><strong>Số báo giá:</strong> ${quoteId}</p>
+                        <p><strong>Ngày:</strong> ${formatDate(customerInfo.date)}</p>
+                    </div>
+                </section>
 
                 <table class="items-table">
                     <thead>
                         <tr>
-                            <th style="width: 5%;" class="center">STT</th>
-                            <th style="width: 33%;">Hạng mục / Mô tả</th>
-                            <th style="width: 7%;" class="center">ĐVT</th>
-                            <th style="width: 8%;" class="right">K.Lượng</th>
-                            <th style="width: 7%;" class="right">SL</th>
-                            <th style="width: 12%;" class="right">Đơn giá</th>
-                            <th style="width: 13%;" class="right">Thành tiền</th>
-                            <th style="width: 15%;">Ghi chú</th>
+                            <th style="width:3%;">STT</th>
+                            <th style="width:8%;">Hình ảnh</th>
+                            <th style="width:28%;">Hạng Mục / Mô Tả</th> 
+                            <th style="width:5%;">ĐVT</th>
+                            <th style="width:6%;">K.Lượng</th>
+                            <th style="width:4%;">SL</th> 
+                            <th style="width:10%;">Đơn giá</th>
+                            <th style="width:12%;">Thành tiền</th>
+                            <th style="width:24%;">Ghi Chú</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        ${renderItems()}
-                    </tbody>
+                    <tbody>${renderItems()}</tbody>
                 </table>
-
-                <div class="summary-section">
-                    <div class="notes-section">
-                         ${(companySettings.defaultQuoteNotes || companySettings.bankAccount || installments.enabled) ? `
-                             ${companySettings.defaultQuoteNotes ? `<div class="terms-section"><h3>Điều khoản & Ghi chú</h3><p>${companySettings.defaultQuoteNotes.replace(/\n/g, '<br>')}</p></div>` : ''}
-                             ${companySettings.bankAccount ? `<div class="terms-section" style="margin-top:15px;"><h3>Thông tin thanh toán</h3><p>${companySettings.bankAccount.replace(/\n/g, '<br>')}</p></div>` : ''}
-                             ${renderInstallments()}
-                         ` : ''}
-                    </div>
-
-                    <div class="totals-section">
-                        <table class="totals-table">
+                
+                <section class="summary-section-pdf">
+                    <div class="totals-box">
+                        <table>
                             <tr>
                                 <td class="label">Tạm tính:</td>
-                                <td class="value">${formatCurrency(totals.subTotal, false)}</td>
+                                <td class="value">${formatCurrency(totals.subTotal)}</td>
                             </tr>
+                            ${totals.discountAmount > 0 ? `
                             <tr>
-                                <td class="label">Giảm giá (${totals.discountType === 'percent' ? `${totals.discountValue}%` : formatCurrency(totals.discountValue, false)}):</td>
-                                <td class="value">${formatCurrency(totals.discountAmount, false)}</td>
-                            </tr>
-                            <tr>
+                                <td class="label">Giảm giá (${totals.discountType === 'percent' ? `${totals.discountValue}%` : ''}):</td>
+                                <td class="value">- ${formatCurrency(totals.discountAmount)}</td>
+                            </tr>` : ''}
+                            ${totals.taxAmount > 0 ? `
+                             <tr>
                                 <td class="label">Thuế VAT (${totals.taxPercent}%):</td>
-                                <td class="value">${formatCurrency(totals.taxAmount, false)}</td>
-                            </tr>
+                                <td class="value">${formatCurrency(totals.taxAmount)}</td>
+                            </tr>` : ''}
+                            <tr><td colspan="2"><hr></td></tr>
                             <tr class="grand-total">
-                                <td class="label">TỔNG CỘNG:</td>
+                                <td class="label">Tổng cộng:</td>
                                 <td class="value">${formatCurrency(totals.grandTotal)}</td>
                             </tr>
                         </table>
                     </div>
-                </div>
-                
-                <div class="signature-section">
+                </section>
+
+                ${renderInstallments()}
+
+                <section class="footer-notes-section">
+                    ${companySettings.bankAccount ? `<h3>THÔNG TIN CHUYỂN KHOẢN</h3>${bankInfoHtml}` : ''}
+                    ${companySettings.defaultQuoteNotes ? `<h3 style="margin-top: 5mm;">GHI CHÚ CHUNG</h3><p style="white-space: pre-wrap;">${companySettings.defaultQuoteNotes}</p>` : ''}
+                </section>
+
+                <section class="signature-section">
                     <div class="signature-box">
+                        <p>Phan Rang, ${formatDate(new Date())}</p>
                         <p><strong>Người lập báo giá</strong></p>
-                        <p><em>(Ký, ghi rõ họ tên)</em></p>
                         <p class="creator-name">${companySettings.printOptions?.creatorName || ''}</p>
                     </div>
-                </div>
-
+                </section>
             </div>
         </body>
         </html>
@@ -359,7 +434,7 @@ module.exports = async (req, res) => {
         await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
 
         const footerTemplate = `
-            <div style="width:100%; font-size: 8pt; padding: 0 40px; color: #777; display: flex; justify-content: space-between; align-items: center;">
+            <div style="width:100%; font-size: 8pt; padding: 0 15mm; color: #777; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
                 <div style="max-width: 80%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>${quoteData.companySettings.printOptions?.footer || ''}</span></div>
                 <div>Trang <span class="pageNumber"></span> / <span class="totalPages"></span></div>
             </div>`;
@@ -368,10 +443,10 @@ module.exports = async (req, res) => {
             format: 'A4',
             printBackground: true,
             margin: {
-                top: '20px',
-                right: '20px',
-                bottom: '40px',
-                left: '20px'
+                top: '0px',
+                right: '0px',
+                bottom: '40px', // Space for footer
+                left: '0px'
             },
             displayHeaderFooter: true,
             headerTemplate: '<div></div>', // Empty header
