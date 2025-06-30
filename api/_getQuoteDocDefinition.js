@@ -1,6 +1,7 @@
 /**
  * @file _getQuoteDocDefinition.js
  * @description Creates a document definition object for pdfmake.
+ * UPDATED: Now expects images as Base64 Data URIs (`imageDataUrl`, `logoDataUrl`) instead of public URLs.
  */
 const path = require('path');
 const { formatDate, formatCurrency, numberToRoman, formatNumber } = require(path.join(process.cwd(), 'api', '_utils-for-api.js'));
@@ -88,8 +89,9 @@ function getQuoteDocDefinition(quoteData) {
                     ],
                     width: '*'
                 },
-                companySettings.logoUrl ? { // Changed from logoDataUrl to logoUrl
-                    image: companySettings.logoUrl,
+                // Use the pre-fetched Base64 data URI for the logo
+                companySettings.logoDataUrl ? { 
+                    image: companySettings.logoDataUrl,
                     width: 70,
                     alignment: 'right'
                 } : { text: '', width: 70 }
@@ -245,7 +247,8 @@ function createItemRow(item, itemIndex) {
 
     return [
         { text: itemIndex, alignment: 'center', style: 'tableCell' },
-        item.imageUrl ? { image: item.imageUrl, width: 50, alignment: 'center' } : {text: '', alignment: 'center'}, // Changed from imageDataUrl
+        // Use the pre-fetched Base64 data URI for the item image
+        item.imageDataUrl ? { image: item.imageDataUrl, width: 50, alignment: 'center' } : {text: '', alignment: 'center'},
         itemNameStack,
         { text: item.unit || '', alignment: 'center', style: 'tableCell' },
         { text: displayedMeasureText, alignment: 'right', style: 'tableCell' },
