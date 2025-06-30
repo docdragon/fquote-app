@@ -2,6 +2,8 @@
 // Vercel Serverless Function to generate PDFs using `pdfmake` for reliability and performance.
 const path = require('path');
 const PdfPrinter = require('pdfmake');
+// Import the Virtual File System for fonts
+const vfsFonts = require('pdfmake/build/vfs_fonts.js');
 const { getQuoteDocDefinition } = require(path.join(process.cwd(), 'api', '_getQuoteDocDefinition.js'));
 
 // Main handler for the Vercel Serverless Function
@@ -23,38 +25,59 @@ module.exports = async (req, res) => {
     }
     
     try {
-        console.log("PDF generation process started with pdfmake.");
+        console.log("PDF generation process started with pdfmake (VFS).");
         
         const quoteData = req.body;
         
-        // Define fonts for pdfmake. Using the default Roboto is the most reliable
-        // approach in a serverless environment without bundling custom font files.
+        // Define fonts for pdfmake. These names must match the fonts in the VFS.
         const fonts = {
             Roboto: {
-                normal: 'node_modules/pdfmake/build/vfs_fonts.js',
-                bold: 'node_modules/pdfmake/build/vfs_fonts.js',
-                italics: 'node_modules/pdfmake/build/vfs_fonts.js',
-                bolditalics: 'node_modules/pdfmake/build/vfs_fonts.js'
+                normal: 'Roboto-Regular.ttf',
+                bold: 'Roboto-Medium.ttf',
+                italics: 'Roboto-Italic.ttf',
+                bolditalics: 'Roboto-MediumItalic.ttf'
             }
         };
 
         const printer = new PdfPrinter(fonts);
+        
+        // Assign the VFS to the printer instance. This is the crucial step.
+        // The `vfs_fonts.js` file exports an object with `pdfMake.vfs`.
+        printer.vfs = vfsFonts.pdfMake.vfs;
+        
         const docDefinition = getQuoteDocDefinition(quoteData);
         console.log("Document definition created.");
         
         const pdfDoc = printer.createPdfKitDocument(docDefinition);
         
-        // Pipe the PDF document directly to the response stream
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', 'inline; filename="bao_gia.pdf"');
+        // Collect the PDF into a buffer instead of streaming directly
+        const chunks = [];
+        pdfDoc.on('data', chunk => {
+            chunks.push(chunk);
+        });
         
-        pdfDoc.pipe(res);
+        pdfDoc.on('end', () => {
+            const result = Buffer.concat(chunks);
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', 'inline; filename="bao_gia.pdf"');
+            res.status(200).send(result);
+            console.log("PDF buffer successfully sent to response.");
+        });
+        
+        pdfDoc.on('error', (err) => {
+             console.error("Error during PDF document stream:", err);
+             res.setHeader('Content-Type', 'application/json');
+             res.status(500).json({
+                success: false,
+                message: 'Error creating PDF document stream.',
+                error: err.message
+             });
+        });
+
         pdfDoc.end();
 
-        console.log("PDF stream successfully piped to response.");
-
     } catch (error) {
-        console.error("--- PDF GENERATION FAILED (pdfmake) ---");
+        console.error("--- PDF GENERATION FAILED (pdfmake VFS) ---");
         const errorMessage = error instanceof Error ? error.message : String(error);
         console.error("Error Message:", errorMessage);
         console.error("Full Error Object:", error);
