@@ -427,9 +427,12 @@ module.exports = async (req, res) => {
     
     let browser = null;
     try {
+        console.log("PDF generation process started.");
         const quoteData = req.body;
         
+        console.log("Chromium: Getting executable path...");
         const executablePath = await chromium.executablePath();
+        console.log("Chromium: Executable path obtained:", executablePath ? 'OK' : 'Not found');
 
         browser = await puppeteer.launch({
             args: chromium.args,
@@ -438,10 +441,17 @@ module.exports = async (req, res) => {
             headless: chromium.headless,
             ignoreHTTPSErrors: true,
         });
+        console.log("Puppeteer: Browser launched successfully.");
 
         const page = await browser.newPage();
+        console.log("Puppeteer: New page created.");
+
         const htmlContent = getQuoteHtml(quoteData);
-        await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+        console.log("HTML content generated. Setting page content...");
+        
+        // Use 'load' which is less strict and less likely to time out in serverless environments
+        await page.setContent(htmlContent, { waitUntil: 'load' });
+        console.log("Puppeteer: Page content set successfully.");
 
         const footerTemplate = `
             <div style="width:100%; font-size: 8pt; padding: 0 15mm; color: #777; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
@@ -449,6 +459,7 @@ module.exports = async (req, res) => {
                 <div>Trang <span class="pageNumber"></span> / <span class="totalPages"></span></div>
             </div>`;
         
+        console.log("Generating PDF buffer...");
         const pdfBuffer = await page.pdf({
             format: 'A4',
             printBackground: true,
@@ -462,27 +473,32 @@ module.exports = async (req, res) => {
             headerTemplate: '<div></div>', // Empty header
             footerTemplate: footerTemplate,
         });
+        console.log("PDF buffer generated. Sending response.");
 
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', 'inline; filename="bao_gia.pdf"');
         res.send(pdfBuffer);
+        console.log("Response sent successfully.");
 
     } catch (error) {
-        // This is a more robust error handler for the serverless environment.
-        // It prevents crashes if the 'error' object is not serializable.
-        console.error("PDF_GENERATION_ERROR:", error);
+        console.error("--- PDF GENERATION FAILED ---");
+        console.error("Error Name:", error.name);
+        console.error("Error Message:", error.message);
+        console.error("Error Stack:", error.stack);
+        console.error("Full Error Object:", error);
         
-        // Ensure we extract a simple, safe string message from the error.
         const errorMessage = error instanceof Error ? error.message : String(error);
         
         res.status(500).json({ 
             success: false, 
-            message: 'A server-side error occurred during PDF generation.', // Use a clear, static message.
-            error: errorMessage 
+            message: 'A server-side error occurred during PDF generation.',
+            error: `[Server] ${errorMessage}` // Prefix for clarity on client-side
         });
     } finally {
         if (browser) {
+            console.log("Closing browser.");
             await browser.close();
         }
+        console.log("PDF generation process finished.");
     }
 };
