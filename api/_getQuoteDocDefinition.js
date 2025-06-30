@@ -88,8 +88,8 @@ function getQuoteDocDefinition(quoteData) {
                     ],
                     width: '*'
                 },
-                companySettings.logoDataUrl ? {
-                    image: companySettings.logoDataUrl,
+                companySettings.logoUrl ? { // Changed from logoDataUrl to logoUrl
+                    image: companySettings.logoUrl,
                     width: 70,
                     alignment: 'right'
                 } : { text: '', width: 70 }
@@ -245,7 +245,7 @@ function createItemRow(item, itemIndex) {
 
     return [
         { text: itemIndex, alignment: 'center', style: 'tableCell' },
-        item.imageDataUrl ? { image: item.imageDataUrl, width: 50, alignment: 'center' } : {text: '', alignment: 'center'},
+        item.imageUrl ? { image: item.imageUrl, width: 50, alignment: 'center' } : {text: '', alignment: 'center'}, // Changed from imageDataUrl
         itemNameStack,
         { text: item.unit || '', alignment: 'center', style: 'tableCell' },
         { text: displayedMeasureText, alignment: 'right', style: 'tableCell' },
