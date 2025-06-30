@@ -196,7 +196,6 @@ function getQuoteHtml(quoteData) {
             <meta charset="UTF-8">
             <title>${(companySettings.printOptions?.title || 'BÁO GIÁ')} - ${quoteId}</title>
             <style>
-                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
                 :root {
                     --primary-color: #3B82F6; 
                     --text-primary-color: #1F2937; 
