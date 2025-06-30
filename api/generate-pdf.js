@@ -1,10 +1,7 @@
-// api/generate-pdf.js
-// Vercel Serverless Function to generate professional PDFs using Puppeteer.
 
-// IMPORTANT: This function relies on 'puppeteer-core' and '@sparticuz/chromium'
-// which need to be included in the project's dependencies for Vercel deployment.
-const puppeteer = require('puppeteer-core');
-const chromium = require('@sparticuz/chromium');
+// api/generate-pdf.js
+// Vercel Serverless Function to generate PDFs using 'html-pdf' for reliability.
+const pdf = require('html-pdf');
 const { formatDate, formatCurrency, numberToRoman, formatNumber } = require('./_utils-for-api');
 
 /**
@@ -402,77 +399,72 @@ function getQuoteHtml(quoteData) {
     `;
 }
 
+
 // Main handler for the Vercel Serverless Function
 module.exports = async (req, res) => {
-    // Set CORS headers for all responses to handle preflight and actual requests
+    // Set CORS headers for all responses
     res.setHeader('Access-Control-Allow-Credentials', true);
-    res.setHeader('Access-Control-Allow-Origin', '*'); // Adjust for production: e.g., 'https://your-app-domain.com'
+    res.setHeader('Access-Control-Allow-Origin', '*'); // Adjust for production
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.setHeader(
-        'Access-Control-Allow-Headers',
-        'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-    );
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
     
     // Handle CORS preflight request
     if (req.method === 'OPTIONS') {
-        res.status(200).end();
-        return;
+        return res.status(200).end();
     }
     
-    // Ensure the method is POST for the actual PDF generation
     if (req.method !== 'POST') {
         res.setHeader('Allow', 'POST');
         return res.status(405).send('Method Not Allowed');
     }
     
-    let browser = null;
     try {
-        console.log("PDF generation process started.");
+        console.log("PDF generation process started with html-pdf.");
         const quoteData = req.body;
         
-        console.log("Chromium: Getting executable path...");
-        const executablePath = await chromium.executablePath();
-        console.log("Chromium: Executable path obtained:", executablePath ? 'OK' : 'Not found');
-
-        browser = await puppeteer.launch({
-            args: chromium.args,
-            defaultViewport: chromium.defaultViewport,
-            executablePath,
-            headless: chromium.headless,
-            ignoreHTTPSErrors: true,
-        });
-        console.log("Puppeteer: Browser launched successfully.");
-
-        const page = await browser.newPage();
-        console.log("Puppeteer: New page created.");
-
         const htmlContent = getQuoteHtml(quoteData);
-        console.log("HTML content generated. Setting page content...");
-        
-        // Use 'load' which is less strict and less likely to time out in serverless environments
-        await page.setContent(htmlContent, { waitUntil: 'load' });
-        console.log("Puppeteer: Page content set successfully.");
+        console.log("HTML content generated.");
 
-        const footerTemplate = `
-            <div style="width:100%; font-size: 8pt; padding: 0 15mm; color: #777; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
-                <div style="max-width: 80%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>${quoteData?.companySettings?.printOptions?.footer || ''}</span></div>
-                <div>Trang <span class="pageNumber"></span> / <span class="totalPages"></span></div>
-            </div>`;
-        
-        console.log("Generating PDF buffer...");
-        const pdfBuffer = await page.pdf({
+        const footerContent = quoteData?.companySettings?.printOptions?.footer || '';
+
+        const options = {
             format: 'A4',
-            printBackground: true,
-            margin: {
-                top: '0px',
-                right: '0px',
-                bottom: '40px', // Space for footer
-                left: '0px'
+            orientation: 'portrait',
+            border: {
+                top: '0.5in',
+                right: '0.5in',
+                bottom: '0.7in', // Increased bottom margin for footer
+                left: '0.5in'
             },
-            displayHeaderFooter: true,
-            headerTemplate: '<div></div>', // Empty header
-            footerTemplate: footerTemplate,
+            header: {
+                height: "0mm" // No header
+            },
+            footer: {
+                height: "20mm",
+                contents: {
+                    default: `
+                        <div style="width:100%; font-size: 8pt; color: #777; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; padding: 0 10px;">
+                            <div style="max-width: 80%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>${footerContent}</span></div>
+                            <div>Trang {{page}} / {{pages}}</div>
+                        </div>`
+                }
+            },
+            base: `https://${req.headers.host}/`
+        };
+
+        console.log("Creating PDF buffer...");
+
+        // html-pdf uses callbacks, so we wrap it in a Promise for async/await
+        const pdfBuffer = await new Promise((resolve, reject) => {
+            pdf.create(htmlContent, options).toBuffer((err, buffer) => {
+                if (err) {
+                    console.error("html-pdf error:", err);
+                    return reject(err);
+                }
+                resolve(buffer);
+            });
         });
+        
         console.log("PDF buffer generated. Sending response.");
 
         res.setHeader('Content-Type', 'application/pdf');
@@ -481,24 +473,17 @@ module.exports = async (req, res) => {
         console.log("Response sent successfully.");
 
     } catch (error) {
-        console.error("--- PDF GENERATION FAILED ---");
-        console.error("Error Name:", error.name);
-        console.error("Error Message:", error.message);
-        console.error("Error Stack:", error.stack);
-        console.error("Full Error Object:", error);
-        
+        console.error("--- PDF GENERATION FAILED (html-pdf) ---");
         const errorMessage = error instanceof Error ? error.message : String(error);
+        console.error("Error Message:", errorMessage);
+        console.error("Full Error Object:", error);
         
         res.status(500).json({ 
             success: false, 
             message: 'A server-side error occurred during PDF generation.',
-            error: `[Server] ${errorMessage}` // Prefix for clarity on client-side
+            error: `[Server] ${errorMessage}`
         });
     } finally {
-        if (browser) {
-            console.log("Closing browser.");
-            await browser.close();
-        }
         console.log("PDF generation process finished.");
     }
 };
