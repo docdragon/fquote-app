@@ -2,7 +2,7 @@
 // api/upload.js
 // This is a Vercel Serverless Function that acts as a secure proxy to Backblaze B2.
 
-const fetch = require('node-fetch'); // Vercel environment has node-fetch
+// const fetch = require('node-fetch'); // REMOVED: Use Vercel's built-in global fetch
 
 // Helper to convert stream to buffer
 async function streamToBuffer(stream) {

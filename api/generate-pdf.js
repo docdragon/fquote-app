@@ -2,7 +2,7 @@
 // Vercel Serverless Function to generate PDFs using `pdfmake`.
 // NEW: Proactively fetches images and embeds them as Base64 to avoid network issues during PDF creation.
 const path = require('path');
-const fetch = require('node-fetch'); // Make sure this is in package.json
+// const fetch = require('node-fetch'); // REMOVED: Use Vercel's global fetch
 const PdfPrinter = require('pdfmake');
 const vfsFonts = require('pdfmake/build/vfs_fonts.js');
 const { getQuoteDocDefinition } = require(path.join(process.cwd(), 'api', '_getQuoteDocDefinition.js'));
@@ -20,7 +20,9 @@ async function fetchImageAsBase64(url) {
             console.warn(`Failed to fetch image from ${url}. Status: ${response.statusText}`);
             return null; // Don't crash, just skip the image
         }
-        const buffer = await response.buffer();
+        // Use standard response.arrayBuffer() and convert to Buffer
+        const arrayBuffer = await response.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
         const contentType = response.headers.get('content-type') || 'image/jpeg';
         return `data:${contentType};base64,${buffer.toString('base64')}`;
     } catch (error) {
