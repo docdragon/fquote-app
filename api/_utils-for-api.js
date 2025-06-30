@@ -6,8 +6,16 @@
 
 const formatCurrency = (number, showSymbol = true) => {
     if (typeof number !== 'number' || isNaN(number)) return showSymbol ? '0 ₫' : '0';
-    const formatted = new Intl.NumberFormat('vi-VN').format(Math.round(number));
-    return showSymbol ? `${formatted} ₫` : formatted;
+    try {
+        // This may fail in Node.js environments without full ICU data
+        const formatted = new Intl.NumberFormat('vi-VN').format(Math.round(number));
+        return showSymbol ? `${formatted} ₫` : formatted;
+    } catch (e) {
+        console.warn("Intl.NumberFormat for 'vi-VN' failed, using fallback. Error:", e.message);
+        // Fallback to basic formatting
+        const formatted = Math.round(number).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        return showSymbol ? `${formatted} ₫` : formatted;
+    }
 };
 
 const formatDate = (dateInput) => {
@@ -15,13 +23,25 @@ const formatDate = (dateInput) => {
     try {
         const date = new Date(dateInput);
         if (isNaN(date.getTime())) return '';
+        // This may fail in Node.js environments without full ICU data
         return new Intl.DateTimeFormat('vi-VN', {
             day: '2-digit',
             month: '2-digit',
             year: 'numeric'
         }).format(date);
     } catch (e) {
-        return '';
+        console.warn("Intl.DateTimeFormat for 'vi-VN' failed, using fallback. Error:", e.message);
+        // Fallback to basic formatting
+        try {
+            const date = new Date(dateInput);
+            if (isNaN(date.getTime())) return '';
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+        } catch {
+            return '';
+        }
     }
 };
 
