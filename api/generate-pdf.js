@@ -45,9 +45,10 @@ module.exports = async (req, res) => {
         const page = await browser.newPage();
         
         console.log("Setting page content...");
-        // Using setContent is more direct than goto for local HTML.
-        // 'networkidle0' waits for network connections to be idle, crucial for loading external fonts/images.
-        await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+        // Using 'domcontentloaded' is much faster and less prone to timeouts in a serverless
+        // environment, especially since all our assets (CSS, images) are inlined in the HTML string.
+        // This is the most critical optimization to prevent timeouts.
+        await page.setContent(htmlContent, { waitUntil: 'domcontentloaded' });
         console.log("Page content set successfully.");
 
         console.log("Generating PDF buffer...");
