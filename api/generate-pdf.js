@@ -1,9 +1,11 @@
 
 // api/generate-pdf.js
 // Vercel Serverless Function to generate PDFs using Puppeteer + Chromium for reliability on Vercel.
+const path = require('path');
 const chromium = require('@sparticuz/chromium');
 const puppeteer = require('puppeteer-core');
-const { getQuoteHtml } = require('./_getQuoteHtml.js');
+// Use path.join to ensure correct file resolution in serverless environment
+const { getQuoteHtml } = require(path.join(process.cwd(), 'api', '_getQuoteHtml.js'));
 
 // Main handler for the Vercel Serverless Function
 module.exports = async (req, res) => {
@@ -32,9 +34,16 @@ module.exports = async (req, res) => {
         const htmlContent = getQuoteHtml(quoteData);
         console.log("HTML content generated.");
 
+        // Add essential flags for compatibility in serverless environments
+        const chromiumArgs = [
+            ...chromium.args,
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+        ];
+
         console.log("Launching browser with optimized settings for Vercel...");
         browser = await puppeteer.launch({
-            args: chromium.args,
+            args: chromiumArgs,
             defaultViewport: chromium.defaultViewport,
             executablePath: await chromium.executablePath(),
             headless: chromium.headless,
@@ -45,9 +54,6 @@ module.exports = async (req, res) => {
         const page = await browser.newPage();
         
         console.log("Setting page content...");
-        // Using 'domcontentloaded' is much faster and less prone to timeouts in a serverless
-        // environment, especially since all our assets (CSS, images) are inlined in the HTML string.
-        // This is the most critical optimization to prevent timeouts.
         await page.setContent(htmlContent, { waitUntil: 'domcontentloaded' });
         console.log("Page content set successfully.");
 

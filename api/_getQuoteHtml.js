@@ -1,5 +1,6 @@
 
-const { formatDate, formatCurrency, numberToRoman, formatNumber } = require('./_utils-for-api');
+const path = require('path');
+const { formatDate, formatCurrency, numberToRoman, formatNumber } = require(path.join(process.cwd(), 'api', '_utils-for-api.js'));
 
 /**
  * Generates the complete HTML content for the PDF, mimicking the app's UI.
