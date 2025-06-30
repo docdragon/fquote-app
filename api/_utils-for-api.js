@@ -57,8 +57,24 @@ const numberToRoman = (num) => {
     return str;
 };
 
+const formatNumber = (number, options = {}) => {
+    if (typeof number !== 'number' || isNaN(number)) return '0';
+    try {
+        // This may fail in Node.js environments without full ICU data
+        return number.toLocaleString('vi-VN', options);
+    } catch (e) {
+        console.warn(`toLocaleString for 'vi-VN' with options failed, using fallback. Error: ${e.message}`);
+        // Fallback that mimics vi-VN format (e.g., 1.234,56)
+        const numStr = String(number);
+        const parts = numStr.split('.');
+        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.'); // dot for thousands
+        return parts.join(','); // comma for decimal
+    }
+};
+
 module.exports = {
     formatCurrency,
     formatDate,
     numberToRoman,
+    formatNumber,
 };

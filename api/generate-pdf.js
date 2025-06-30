@@ -5,7 +5,7 @@
 // which need to be included in the project's dependencies for Vercel deployment.
 const puppeteer = require('puppeteer-core');
 const chromium = require('@sparticuz/chromium');
-const { formatDate, formatCurrency, numberToRoman } = require('./_utils-for-api');
+const { formatDate, formatCurrency, numberToRoman, formatNumber } = require('./_utils-for-api');
 
 /**
  * Generates the complete HTML content for the PDF, mimicking the app's UI.
@@ -57,7 +57,7 @@ function getQuoteHtml(quoteData) {
             if (item.calcType === 'length') measureInMeters /= 1000;
             else if (item.calcType === 'area') measureInMeters /= 1000000;
             else if (item.calcType === 'volume') measureInMeters /= 1000000000;
-            displayedMeasureText = `${parseFloat(measureInMeters.toFixed(4)).toLocaleString('vi-VN')}`;
+            displayedMeasureText = `${formatNumber(parseFloat(measureInMeters.toFixed(4)))}`;
         }
     
         const imgSrc = item.imageDataUrl || '';
@@ -69,7 +69,7 @@ function getQuoteHtml(quoteData) {
                 <td class="item-name-spec-cell">${displayNameCellContent}</td>
                 <td class="center">${item.unit || ''}</td>
                 <td class="right">${displayedMeasureText}</td>
-                <td class="right">${(item.quantity || 0).toLocaleString('vi-VN', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}</td>
+                <td class="right">${formatNumber((item.quantity || 0), { minimumFractionDigits: 0, maximumFractionDigits: 2 })}</td>
                 <td class="right price-cell">${priceCellContent}</td>
                 <td class="right">${formatCurrency(item.lineTotal || 0, false)}</td>
                 <td class="notes-cell">${item.notes || ''}</td>
