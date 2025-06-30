@@ -1,4 +1,3 @@
-
 /**
  * @file quote.js
  * @description Quản lý logic báo giá với listeners thời gian thực, trạng thái, và các tùy chỉnh.
@@ -55,32 +54,45 @@ export function listenToCompanySettings(userId) {
     const unsubscribe = docRef.onSnapshot(doc => {
         if (doc.exists) {
             companySettings = doc.data();
-            DOM.companyNameSettingInput.value = companySettings.name || '';
-            DOM.companyAddressSettingInput.value = companySettings.address || '';
-            DOM.companyPhoneSettingInput.value = companySettings.phone || '';
-            DOM.companyEmailSettingInput.value = companySettings.email || '';
-            DOM.companyTaxIdSettingInput.value = companySettings.taxId || '';
-            DOM.companyBankAccountSetting.value = companySettings.bankAccount || '';
-            DOM.defaultNotesSettingInput.value = companySettings.defaultQuoteNotes || '';
-            if (companySettings.logoDataUrl) {
-                DOM.logoPreview.src = companySettings.logoDataUrl;
-                DOM.logoPreview.style.display = 'block';
-            } else {
-                 DOM.logoPreview.style.display = 'none';
-            }
-
-            const printOptions = companySettings.printOptions || {};
-            DOM.printTitleSettingInput.value = printOptions.title || 'BÁO GIÁ';
-            DOM.printCreatorNameSettingInput.value = printOptions.creatorName || (auth.currentUser?.displayName || '');
-            DOM.printFooterSettingInput.value = printOptions.footer || '';
-
         } else {
-            companySettings = {};
-            DOM.printCreatorNameSettingInput.value = auth.currentUser?.displayName || '';
+            // Provide a default structure if the settings document doesn't exist.
+            companySettings = {
+                name: '', address: '', phone: '', email: '', taxId: '',
+                bankAccount: '', logoDataUrl: null, defaultQuoteNotes: '',
+                printOptions: {
+                    title: 'BÁO GIÁ',
+                    creatorName: auth.currentUser?.displayName || '',
+                    footer: ''
+                }
+            };
         }
+
+        // Update UI from either existing or default settings to ensure consistency
+        DOM.companyNameSettingInput.value = companySettings.name || '';
+        DOM.companyAddressSettingInput.value = companySettings.address || '';
+        DOM.companyPhoneSettingInput.value = companySettings.phone || '';
+        DOM.companyEmailSettingInput.value = companySettings.email || '';
+        DOM.companyTaxIdSettingInput.value = companySettings.taxId || '';
+        DOM.companyBankAccountSetting.value = companySettings.bankAccount || '';
+        DOM.defaultNotesSettingInput.value = companySettings.defaultQuoteNotes || '';
+        
+        if (companySettings.logoDataUrl) {
+            DOM.logoPreview.src = companySettings.logoDataUrl;
+            DOM.logoPreview.style.display = 'block';
+        } else {
+             DOM.logoPreview.src = '#';
+             DOM.logoPreview.style.display = 'none';
+        }
+
+        const printOptions = companySettings.printOptions || {};
+        DOM.printTitleSettingInput.value = printOptions.title || 'BÁO GIÁ';
+        DOM.printCreatorNameSettingInput.value = printOptions.creatorName || (auth.currentUser?.displayName || '');
+        DOM.printFooterSettingInput.value = printOptions.footer || '';
+        
     }, error => console.error("Lỗi lắng nghe cài đặt công ty:", error));
     return unsubscribe;
 }
+
 
 export function listenToCurrentWorkingQuote(userId) {
     if (!userId) return () => {};

@@ -13,7 +13,17 @@ const { formatDate, formatCurrency, numberToRoman } = require('./_utils-for-api'
  * @returns {string} A string containing the full HTML document.
  */
 function getQuoteHtml(quoteData) {
-    const { companySettings, quoteId, customerInfo, items, mainCategories, totals, installments } = quoteData;
+    // Defensive destructuring to prevent errors from malformed or incomplete quoteData.
+    const { 
+        companySettings = {},
+        quoteId = 'N/A', 
+        customerInfo = {}, 
+        items = [], 
+        mainCategories = [], 
+        totals = {}, 
+        installments = {} 
+    } = quoteData || {};
+
 
     const createItemRowHTML = (item, itemIndex) => {
         let displayNameCellContent = `<div class="item-name-display">${(item.name || '[Chưa có tên]').toUpperCase()}</div>`;
@@ -124,7 +134,7 @@ function getQuoteHtml(quoteData) {
 
         let totalPercent = 0;
         let totalAmount = 0;
-        const grandTotal = totals.grandTotal;
+        const grandTotal = totals.grandTotal || 0;
 
         const rows = installments.data.map((inst, index) => {
              const amount = inst.value > 0
@@ -353,12 +363,12 @@ function getQuoteHtml(quoteData) {
                                 <td class="label">Tạm tính:</td>
                                 <td class="value">${formatCurrency(totals.subTotal)}</td>
                             </tr>
-                            ${totals.discountAmount > 0 ? `
+                            ${(totals.discountAmount || 0) > 0 ? `
                             <tr>
                                 <td class="label">Giảm giá (${totals.discountType === 'percent' ? `${totals.discountValue}%` : ''}):</td>
                                 <td class="value">- ${formatCurrency(totals.discountAmount)}</td>
                             </tr>` : ''}
-                            ${totals.taxAmount > 0 ? `
+                            ${(totals.taxAmount || 0) > 0 ? `
                              <tr>
                                 <td class="label">Thuế VAT (${totals.taxPercent}%):</td>
                                 <td class="value">${formatCurrency(totals.taxAmount)}</td>
@@ -435,7 +445,7 @@ module.exports = async (req, res) => {
 
         const footerTemplate = `
             <div style="width:100%; font-size: 8pt; padding: 0 15mm; color: #777; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
-                <div style="max-width: 80%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>${quoteData.companySettings.printOptions?.footer || ''}</span></div>
+                <div style="max-width: 80%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><span>${quoteData?.companySettings?.printOptions?.footer || ''}</span></div>
                 <div>Trang <span class="pageNumber"></span> / <span class="totalPages"></span></div>
             </div>`;
         
