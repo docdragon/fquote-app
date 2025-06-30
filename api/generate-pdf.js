@@ -468,8 +468,18 @@ module.exports = async (req, res) => {
         res.send(pdfBuffer);
 
     } catch (error) {
-        console.error("PDF Generation Error:", error);
-        res.status(500).json({ success: false, message: 'Lỗi tạo file PDF.', error: error.message });
+        // This is a more robust error handler for the serverless environment.
+        // It prevents crashes if the 'error' object is not serializable.
+        console.error("PDF_GENERATION_ERROR:", error);
+        
+        // Ensure we extract a simple, safe string message from the error.
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        
+        res.status(500).json({ 
+            success: false, 
+            message: 'A server-side error occurred during PDF generation.', // Use a clear, static message.
+            error: errorMessage 
+        });
     } finally {
         if (browser) {
             await browser.close();
