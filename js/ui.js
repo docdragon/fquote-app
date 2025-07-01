@@ -178,11 +178,9 @@ async function generatePdfViaApi(options, quoteData) {
         });
 
         if (!response.ok) {
-            const errorData = await response.json().catch(() => ({ message: response.statusText, error: '' }));
+            const errorData = await response.json().catch(() => ({ message: response.statusText }));
             console.error('PDF Generation API Error:', errorData);
-            // Prioritize the more specific 'error' field from the robust server response, fallback to 'message'.
-            const detailedErrorMessage = errorData.error || errorData.message || 'Không thể tạo PDF.';
-            throw new Error(`Lỗi từ server: ${detailedErrorMessage}`);
+            throw new Error(`Lỗi từ server: ${errorData.message || 'Không thể tạo PDF.'}`);
         }
 
         const pdfBlob = await response.blob();

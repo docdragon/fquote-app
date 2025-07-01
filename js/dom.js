@@ -277,9 +277,6 @@ export const whatIfDifferenceSpan = document.getElementById('whatIfDifferenceSpa
 
 // Saved Costing Sheets
 export const savedCostingsTableBody = document.getElementById('savedCostingsList');
-export const savedCostingsCountSpan = document.getElementById('savedCostingsCountSpan');
-export const savedCostingsSearchInput = document.getElementById('savedCostingsSearchInput');
-
 
 // Materials Library section 
 export const materialsLibrarySection = document.getElementById('materialsLibrarySection');

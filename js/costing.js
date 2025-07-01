@@ -647,6 +647,7 @@ export function listenToSavedCostingSheets(userId) {
     const unsubscribe = query.onSnapshot(snapshot => {
         savedCostingSheetsGlobal = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         renderSavedCostingSheetsTable();
+        populateCreateFromCostingTemplateSelect(costingTemplatesGlobal); // Repopulate in case a PGT was saved from a template
     }, error => {
         console.error("Lỗi lắng nghe phiếu giá thành đã lưu:", error);
         showNotification('Không thể tải danh sách phiếu giá thành đã lưu.', 'error');
@@ -655,22 +656,11 @@ export function listenToSavedCostingSheets(userId) {
 }
 
 function renderSavedCostingSheetsTable() {
-    if (!DOM.savedCostingsTableBody) {
-        return; // Prevent crash if element doesn't exist yet
-    }
-
-    const searchTerm = DOM.savedCostingsSearchInput ? DOM.savedCostingsSearchInput.value.toLowerCase() : '';
-
-    const filteredSheets = savedCostingSheetsGlobal.filter(sheet => {
-        const nameMatch = sheet.productName && sheet.productName.toLowerCase().includes(searchTerm);
-        return nameMatch;
-    });
-
     let html = '';
-    if (filteredSheets.length === 0) {
-        html = '<tr><td colspan="5" style="text-align:center;">Chưa có phiếu tính giá nào được lưu hoặc không tìm thấy.</td></tr>';
+    if (savedCostingSheetsGlobal.length === 0) {
+        html = '<tr><td colspan="5" style="text-align:center;">Chưa có phiếu tính giá nào được lưu.</td></tr>';
     } else {
-        filteredSheets.forEach((sheet, index) => {
+        savedCostingSheetsGlobal.forEach((sheet, index) => {
             html += `
                 <tr data-id="${sheet.id}" data-type="savedCostingSheet">
                     <td>${index + 1}</td>
@@ -685,10 +675,6 @@ function renderSavedCostingSheetsTable() {
         });
     }
     DOM.savedCostingsTableBody.innerHTML = html;
-    
-    if (DOM.savedCostingsCountSpan) {
-        DOM.savedCostingsCountSpan.textContent = filteredSheets.length;
-    }
 }
 
 export async function loadCostingSheet(sheetId) {
@@ -1202,7 +1188,4 @@ export function initCostingTabEventListeners() {
     if (DOM.calculateWhatIfButton) {
         DOM.calculateWhatIfButton.addEventListener('click', calculateWhatIfScenario);
     }
-
-    // Listener for the new search input
-    DOM.savedCostingsSearchInput?.addEventListener('input', renderSavedCostingSheetsTable);
 }

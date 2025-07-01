@@ -1,3 +1,4 @@
+
 /**
  * @file quote.js
  * @description Quản lý logic báo giá với listeners thời gian thực, trạng thái, và các tùy chỉnh.
@@ -9,7 +10,6 @@ import { formatDate, formatCurrency, generateSimpleQuoteId, generateUniqueId, nu
 import { getLoadedCatalog, getMainCategories, findOrCreateMainCategory, saveItemToMasterCatalog } from './catalog.js';
 import { getSavedCostingSheets } from './costing.js';
 import { showNotification } from './notifications.js';
-import { uploadImageToB2 } from './b2Storage.js'; // Import the new upload function
 
 // --- STATE & CONSTANTS ---
 const QUOTE_STATUSES = {
@@ -23,9 +23,9 @@ const QUOTE_TEMPLATES_COLLECTION = 'quoteTemplates';
 let currentQuoteItems = [];
 let savedQuotes = [];
 let quoteTemplates = [];
-let companySettings = { bankAccount: '', logoUrl: null, defaultQuoteNotes: '' }; // Changed to logoUrl
+let companySettings = { bankAccount: '', logoDataUrl: null, defaultQuoteNotes: '' };
 let currentQuoteIdInternal = null;
-let currentItemImageUrl = null; // Changed from itemImageDataBase64QuoteForm
+let itemImageDataBase64QuoteForm = null;
 let quoteInstallmentData = [];
 
 // === GETTERS (REFACTORED TO STANDARD FUNCTIONS) ===
@@ -55,45 +55,32 @@ export function listenToCompanySettings(userId) {
     const unsubscribe = docRef.onSnapshot(doc => {
         if (doc.exists) {
             companySettings = doc.data();
-        } else {
-            // Provide a default structure if the settings document doesn't exist.
-            companySettings = {
-                name: '', address: '', phone: '', email: '', taxId: '',
-                bankAccount: '', logoUrl: null, defaultQuoteNotes: '', // Changed to logoUrl
-                printOptions: {
-                    title: 'BÁO GIÁ',
-                    creatorName: auth.currentUser?.displayName || '',
-                    footer: ''
-                }
-            };
-        }
+            DOM.companyNameSettingInput.value = companySettings.name || '';
+            DOM.companyAddressSettingInput.value = companySettings.address || '';
+            DOM.companyPhoneSettingInput.value = companySettings.phone || '';
+            DOM.companyEmailSettingInput.value = companySettings.email || '';
+            DOM.companyTaxIdSettingInput.value = companySettings.taxId || '';
+            DOM.companyBankAccountSetting.value = companySettings.bankAccount || '';
+            DOM.defaultNotesSettingInput.value = companySettings.defaultQuoteNotes || '';
+            if (companySettings.logoDataUrl) {
+                DOM.logoPreview.src = companySettings.logoDataUrl;
+                DOM.logoPreview.style.display = 'block';
+            } else {
+                 DOM.logoPreview.style.display = 'none';
+            }
 
-        // Update UI from either existing or default settings to ensure consistency
-        DOM.companyNameSettingInput.value = companySettings.name || '';
-        DOM.companyAddressSettingInput.value = companySettings.address || '';
-        DOM.companyPhoneSettingInput.value = companySettings.phone || '';
-        DOM.companyEmailSettingInput.value = companySettings.email || '';
-        DOM.companyTaxIdSettingInput.value = companySettings.taxId || '';
-        DOM.companyBankAccountSetting.value = companySettings.bankAccount || '';
-        DOM.defaultNotesSettingInput.value = companySettings.defaultQuoteNotes || '';
-        
-        if (companySettings.logoUrl) { // Changed to logoUrl
-            DOM.logoPreview.src = companySettings.logoUrl;
-            DOM.logoPreview.style.display = 'block';
-        } else {
-             DOM.logoPreview.src = '#';
-             DOM.logoPreview.style.display = 'none';
-        }
+            const printOptions = companySettings.printOptions || {};
+            DOM.printTitleSettingInput.value = printOptions.title || 'BÁO GIÁ';
+            DOM.printCreatorNameSettingInput.value = printOptions.creatorName || (auth.currentUser?.displayName || '');
+            DOM.printFooterSettingInput.value = printOptions.footer || '';
 
-        const printOptions = companySettings.printOptions || {};
-        DOM.printTitleSettingInput.value = printOptions.title || 'BÁO GIÁ';
-        DOM.printCreatorNameSettingInput.value = printOptions.creatorName || (auth.currentUser?.displayName || '');
-        DOM.printFooterSettingInput.value = printOptions.footer || '';
-        
+        } else {
+            companySettings = {};
+            DOM.printCreatorNameSettingInput.value = auth.currentUser?.displayName || '';
+        }
     }, error => console.error("Lỗi lắng nghe cài đặt công ty:", error));
     return unsubscribe;
 }
-
 
 export function listenToCurrentWorkingQuote(userId) {
     if (!userId) return () => {};
@@ -139,59 +126,43 @@ export function listenToSavedQuotes(userId) {
     return unsubscribe;
 }
 
-// === IMAGE HANDLING (via B2 UPLOAD) ===
+// === IMAGE HANDLING (Base64) ===
 
-export async function itemImageFileQuoteFormHandler(event) {
+export function itemImageFileQuoteFormHandler(event) {
     const file = event.target.files[0];
-    const userId = auth.currentUser?.uid;
-    if (!file || !userId) {
-        return;
-    }
-    
-    if (file.size > 500 * 1024) { // 500 KB limit
-        showNotification('Ảnh quá lớn. Vui lòng chọn ảnh nhỏ hơn 500KB.', 'error');
-        event.target.value = '';
-        return;
-    }
-
-    const targetPath = `quote_images/${userId}/${Date.now()}-${file.name}`;
-    const uploadedUrl = await uploadImageToB2(file, targetPath);
-    
-    if (uploadedUrl) {
-        DOM.itemImagePreviewQuoteForm.src = uploadedUrl;
-        DOM.itemImagePreviewQuoteForm.style.display = 'block';
-        currentItemImageUrl = uploadedUrl; // Store the URL
-        DOM.removeItemImageButtonQuoteForm.style.display = 'inline-flex';
-    } else {
-        event.target.value = ''; // Clear input if upload fails
+    if (file) {
+        if (file.size > 500 * 1024) {
+            showNotification('Ảnh quá lớn. Vui lòng chọn ảnh nhỏ hơn 500KB.', 'error');
+            DOM.itemImageFileQuoteForm.value = '';
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            DOM.itemImagePreviewQuoteForm.src = e.target.result;
+            DOM.itemImagePreviewQuoteForm.style.display = 'block';
+            itemImageDataBase64QuoteForm = e.target.result;
+            DOM.removeItemImageButtonQuoteForm.style.display = 'inline-flex';
+        }
+        reader.readAsDataURL(file);
     }
 }
 
-export async function companyLogoFileHandler(event) {
+export function companyLogoFileHandler(event) {
     const file = event.target.files[0];
-    const userId = auth.currentUser?.uid;
-    if (!file || !userId) {
-        return;
-    }
-
-    if (file.size > 1 * 1024 * 1024) { // 1MB limit
-        showNotification('Logo quá lớn (tối đa 1MB).', 'error');
-        event.target.value = '';
-        return;
-    }
-
-    const targetPath = `logos/${userId}/logo-${Date.now()}`;
-    const uploadedUrl = await uploadImageToB2(file, targetPath);
-
-    if (uploadedUrl) {
-        DOM.logoPreview.src = uploadedUrl;
-        DOM.logoPreview.style.display = 'block';
-        companySettings.logoUrl = uploadedUrl; // Store the URL
-    } else {
-        event.target.value = '';
+    if (file) {
+        if (file.size > 1 * 1024 * 1024) {
+            showNotification('Logo quá lớn (tối đa 1MB).', 'error');
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            DOM.logoPreview.src = e.target.result;
+            DOM.logoPreview.style.display = 'block';
+            companySettings.logoDataUrl = e.target.result;
+        }
+        reader.readAsDataURL(file);
     }
 }
-
 
 // === QUOTE STATUS MANAGEMENT ===
 export async function updateQuoteStatus(quoteId, newStatus, userId) {
@@ -242,7 +213,7 @@ export async function saveCompanySettingsHandler(userId) {
         email: DOM.companyEmailSettingInput.value.trim(),
         taxId: DOM.companyTaxIdSettingInput.value.trim(),
         bankAccount: DOM.companyBankAccountSetting.value.trim(),
-        logoUrl: companySettings.logoUrl || null, // Changed to logoUrl
+        logoDataUrl: companySettings.logoDataUrl || null,
         defaultQuoteNotes: DOM.defaultNotesSettingInput.value.trim(),
         printOptions: printOptions
     };
@@ -309,7 +280,7 @@ export async function addOrUpdateItemFromForm(userId) {
         height: parseFloat(DOM.itemHeightQuoteForm.value) || null,
         depth: parseFloat(DOM.itemDepthQuoteForm.value) || null,
         calculatedMeasure,
-        imageUrl: currentItemImageUrl, // Changed to imageUrl
+        imageDataUrl: itemImageDataBase64QuoteForm,
         notes: DOM.itemNotesQuoteForm.value.trim(),
         mainCategoryId,
     };
@@ -318,9 +289,8 @@ export async function addOrUpdateItemFromForm(userId) {
     if (itemIdToEdit) {
         const itemIndex = currentQuoteItems.findIndex(i => i.id === itemIdToEdit);
         if(itemIndex > -1) {
-            // Preserve old image if no new one was uploaded
-            if (!newItemData.imageUrl) {
-                newItemData.imageUrl = currentQuoteItems[itemIndex].imageUrl;
+            if (!newItemData.imageDataUrl) {
+                newItemData.imageDataUrl = currentQuoteItems[itemIndex].imageDataUrl;
             }
             currentQuoteItems[itemIndex] = { ...currentQuoteItems[itemIndex], ...newItemData };
         }
@@ -352,12 +322,10 @@ export function editQuoteItemOnForm(itemId) {
         const category = getMainCategories().find(cat => cat.id === item.mainCategoryId);
         DOM.quoteItemMainCategoryInput.value = category ? category.name : '';
         DOM.itemQuantityQuoteForm.value = item.quantity;
-        
-        currentItemImageUrl = item.imageUrl || null; // Changed to imageUrl
-        DOM.itemImagePreviewQuoteForm.src = item.imageUrl || '#';
-        DOM.itemImagePreviewQuoteForm.style.display = item.imageUrl ? 'block' : 'none';
-        DOM.removeItemImageButtonQuoteForm.style.display = item.imageUrl ? 'inline-flex' : 'none';
-
+        itemImageDataBase64QuoteForm = item.imageDataUrl || null;
+        DOM.itemImagePreviewQuoteForm.src = item.imageDataUrl || '#';
+        DOM.itemImagePreviewQuoteForm.style.display = item.imageDataUrl ? 'block' : 'none';
+        DOM.removeItemImageButtonQuoteForm.style.display = item.imageDataUrl ? 'inline-flex' : 'none';
         DOM.itemImageFileQuoteForm.value = '';
         DOM.addOrUpdateItemButtonForm.textContent = 'Cập nhật H.mục';
         DOM.cancelEditQuoteItemButtonForm.style.display = 'inline-block';
@@ -405,9 +373,7 @@ function createItemRowHTML(item, itemIndex) {
         displayNameCellContent += `<br><span class="item-dimensions-display">KT: ${dimensionsString}</span>`;
     }
     if (item.spec) displayNameCellContent += `<br><span class="item-spec-display">${item.spec}</span>`;
-    
-    // Changed to use imageUrl
-    const imgSrc = item.imageUrl || 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+    const imgSrc = item.imageDataUrl || 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
     let displayedMeasureText = '';
     if (item.calculatedMeasure && typeof item.calculatedMeasure === 'number' && item.calcType !== 'unit') {
         let measureInMeters = item.calculatedMeasure;
@@ -430,7 +396,7 @@ function createItemRowHTML(item, itemIndex) {
     return `
         <tr id="qitem-display-${item.id}" data-id="${item.id}" data-type="quoteItem">
             <td style="text-align: center;">${itemIndex}</td>
-            <td><img src="${imgSrc}" alt="Ảnh" class="item-image-preview-table" style="display:${item.imageUrl ? 'block' : 'none'};"></td>
+            <td><img src="${imgSrc}" alt="Ảnh" class="item-image-preview-table" style="display:${item.imageDataUrl ? 'block' : 'none'};"></td>
             <td class="item-name-spec-cell">${displayNameCellContent}</td>
             <td style="text-align: center;">${item.unit || ''}</td>
             <td style="text-align: right;">${displayedMeasureText}</td>
@@ -460,7 +426,7 @@ function clearQuoteItemFormInputs(focusOnName = true) {
     DOM.itemImagePreviewQuoteForm.style.display = 'none';
     DOM.itemImagePreviewQuoteForm.src = '#';
     DOM.removeItemImageButtonQuoteForm.style.display = 'none';
-    currentItemImageUrl = null; // Changed from itemImageDataBase64QuoteForm
+    itemImageDataBase64QuoteForm = null;
     DOM.quoteItemMainCategoryInput.value = "";
 
     updateDimensionInputsVisibility();
@@ -1134,7 +1100,7 @@ export function updateDimensionInputsVisibility() {
 }
 
 export function removeQuoteItemImage() {
-    currentItemImageUrl = null; // Changed from itemImageDataBase64QuoteForm
+    itemImageDataBase64QuoteForm = null;
     DOM.itemImageFileQuoteForm.value = '';
     DOM.itemImagePreviewQuoteForm.src = '#';
     DOM.itemImagePreviewQuoteForm.style.display = 'none';
