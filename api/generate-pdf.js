@@ -9,6 +9,23 @@ const chromium = require('@sparticuz/chromium');
 const { formatDate, formatCurrency, numberToRoman } = require('./_utils-for-api');
 
 /**
+ * IMPORTANT: This helper function replaces toLocaleString('vi-VN') to avoid
+ * serverless environment issues with missing Intl data. It safely formats numbers
+ * in the Vietnamese style (e.g., 1.234,56).
+ * @param {number} num The number to format.
+ * @param {number} maxFrac Maximum fraction digits.
+ * @returns {string} The formatted number string.
+ */
+const formatVnNumber = (num, maxFrac = 2) => {
+    if (typeof num !== 'number' || isNaN(num)) return '';
+    // Use toLocaleString with 'en-US' which is generally safe, then swap separators.
+    // en-US: 1,234.56 -> We want: 1.234,56
+    const enString = num.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: maxFrac});
+    return enString.replace(/,/g, 'X').replace(/\./g, ',').replace(/X/g, '.');
+};
+
+
+/**
  * Generates the complete HTML content for the PDF.
  * This function creates a professional-looking quote document.
  * @param {object} quoteData The full data object for the quote.
@@ -41,7 +58,7 @@ function getQuoteHtml(quoteData) {
                 if (item.calcType === 'length') measureValue /= 1000;
                 else if (item.calcType === 'area') measureValue /= 1000000;
                 else if (item.calcType === 'volume') measureValue /= 1000000000;
-                displayedMeasureText = `${parseFloat(measureValue.toFixed(4)).toLocaleString('vi-VN')}`;
+                displayedMeasureText = `${formatVnNumber(parseFloat(measureValue.toFixed(4)), 4)}`;
             }
 
             let dimParts = [];
@@ -60,7 +77,7 @@ function getQuoteHtml(quoteData) {
                     </td>
                     <td class="center">${item.unit || ''}</td>
                     <td class="right">${displayedMeasureText}</td>
-                    <td class="right">${(item.quantity || 0).toLocaleString('vi-VN', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}</td>
+                    <td class="right">${formatVnNumber(item.quantity || 0, 2)}</td>
                     <td class="right">${formatCurrency(item.price || 0, false)}</td>
                     <td class="right">${formatCurrency(item.lineTotal || 0, false)}</td>
                     <td>${item.notes || ''}</td>
